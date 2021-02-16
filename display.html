@@ -1,0 +1,211 @@
+<html>
+	<head>
+		<script src="keyItemList.js"></script>
+	</head>
+<style>
+
+	.ib {
+		display: inline-block;
+	}
+
+	body {
+		background-color: #222222;
+	}
+
+	body div {
+		margin: 0.25rem;
+		background: #00000000;
+	}
+
+	.itemGrid {
+		display: grid;
+		grid-template-columns: repeat(3, 100px);
+		gap: 10px;
+		grid-auto-rows: minmax(50px, auto);
+	}
+
+	.itemImage {
+		filter: drop-shadow(5px 5px 4px #111);
+		width: 90px;
+		height: 90px;
+		position: relative;
+		object-fit: contain;
+	}
+
+	.itemImageHas {
+		animation: 1s linear 0s 1 forwards itemGet;
+	}
+
+	.itemImage img {        
+		object-fit: contain;
+	}
+
+	.itemImage.transparent {
+		opacity: 0.3;
+	}
+
+	.autoText {
+		font-weight: 800;
+    	font-size: 2rem;
+    	-webkit-text-stroke: 3px black;
+		color: white;
+		font-family: fantasy;
+	}
+
+	#infoBox {
+		color: white;
+		font-size: 1.3rem;
+		-webkit-text-stroke: 1px black;
+		white-space: pre-wrap;
+		font-family: fantasy;
+	}
+
+	.autoCircle {
+		background: red;
+		filter: blur(2px);
+		border-radius: 50% 50%;
+		min-width: 1rem;
+    	min-height: 1rem;
+		transition: background-color 0.2s;
+	}
+
+	.autoCircle.disabled {
+		background: gray;
+	}
+
+	.autoCircle.waiting {
+		background: blue;
+	}
+
+	@keyframes itemGet {
+		0% { filter: brightness(1); opacity: 0.3;}
+		20% { filter: brightness(4); opacity: 1;}
+		100% { filter: brightness(1); opacity: 1;}
+		
+	}
+
+</style>
+
+<body>
+	<div style="display: flex">
+		<div class="itemGrid"></div>
+		
+		<div>
+			<p></p>
+			<br/>
+			<div>
+				<span class="autoCircle disabled ib"></span>
+				<span class="ib autoText">AUTO</span>
+			</div>
+			<p id="infoBox"></p>
+			<p></p>
+		</div>
+	</div>
+
+</body>
+
+<script>
+	// This is the transparent display portion of the DS1 Tracker
+
+	// Declare and generate the grid for tracking
+	const gridDiv = document.querySelector('.itemGrid')
+	const autoCirle = document.querySelector('.autoCircle')
+	const infoBox = document.querySelector('#infoBox')
+
+	const randomizerGrid = ["Lordvessel",         "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard",
+					  "Covenant of Artorias", "Key to Depths",       "Four Kings Bequeathed Lord Soul Shard", 
+					  "Peculiar Doll",       "Annex Key",           "Nito Lord Soul",
+					  "Broken Pendant",     "Light Source",         "Bed of Chaos Lord Soul",
+					  "Key to the Seal",       ,       "Basement Key",         
+					  "Blighttown Key",        ,       "Crest of Artorias"]
+
+	const gridImgLink = {}
+
+	for (let imgName of randomizerGrid) {
+		if (imgName) {
+			let imgEl = document.createElement('img')
+			imgEl.src = `img/${namedItemList[imgName]}.png`
+			imgEl.classList.add('transparent', 'itemImage')
+			gridDiv.appendChild(imgEl)
+			gridImgLink[imgName] = imgEl
+		} 
+		else gridDiv.appendChild(document.createElement('img'))
+	}
+
+	let player = null
+	/*
+		Player obj is
+		- name      	souls       level       items
+		- keyitems		itemhash    headerhash
+	*/
+
+
+	// Set up the Event Source to listen for player events
+	const baseUrl = (window.location.protocol != 'file:') ? 
+        'https://ds1.leagueautotimer.dev' : 'http://localhost:8081'
+	let earID = new URLSearchParams(window.location.search).get('ear')
+	const saveDataListener = new EventSource(`${baseUrl}/listen?ear=${earID}`)
+
+	saveDataListener.addEventListener('No-Speaker', (event) => {
+		retryTimeout = 0
+		// Waiting for file, server will keep alive
+		autoCirle.classList.remove('disabled')
+		autoCirle.classList.add('waiting')
+		infoBox.textContent = 'Waiting for file to be selected in other webpage'
+	})
+
+	// If we get save-data, do catch-up or do a diff
+	saveDataListener.addEventListener('Save-Data', event => {
+		retryTimeout = 0
+		autoCirle.classList.remove('disabled', 'waiting')
+		infoBox.textContent = ""
+		
+		let parsePlayer = JSON.parse(event.data)
+
+		// NOTE: again hard to verify same characters*
+		if (player && player.name == parsePlayer.name) {	// diff
+        	let keyItemIntersect = parsePlayer.keyItems.filter(ki => !player.keyItems.includes(ki))
+			// for every new item, do an animation
+			for (let imgLink in gridImgLink) {
+				if (parsePlayer.keyItems.includes(imgLink)) {
+					gridImgLink[imgLink].classList.replace('transparent', 'itemImageHas')
+				}
+			}
+		} else {
+			for (let imgLink in gridImgLink) {
+				if (parsePlayer.keyItems.includes(imgLink))
+					gridImgLink[imgLink].classList.remove('transparent')
+				else
+					gridImgLink[imgLink].classList.add('transparent')
+			}
+		}
+		
+		player = parsePlayer
+		infoBox.textContent = `Name:\t ${player.name} \nLevel:\t ${player.level} \nSouls:\t ${player.souls}`
+		// infoBox.textContent += `Items: ${Object.keys(player.items).length} \nKey Items: ${player.keyItems.length} \n`
+	})
+
+	let retryTimeout = 0
+
+	saveDataListener.addEventListener('error', event => {
+		retryTimeout++ 
+		
+		if (!earID) { 
+			infoBox.textContent = "earID param is unset"
+			saveDataListener.close()
+			return
+		}
+		else if (retryTimeout < 50) {
+			console.log(`Failed to connect, doing debounce ${retryTimeout}`)
+			infoBox,textContent = "Connecting..."
+		} else {
+			console.log(`Can't connect to server.`)
+			infoBox.textContent = "Failed to connect to server"
+			saveDataListener.close()
+		}
+	})
+
+	// saveDataListener.addEventListener('open', event => retryTimeout = 0)
+
+</script>
+</html>

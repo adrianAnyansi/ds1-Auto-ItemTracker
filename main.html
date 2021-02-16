@@ -1,0 +1,675 @@
+<html>
+    <head>
+        <script src="keyItemList.js"></script>
+    </head>
+<style>
+    .editProp {
+        color: orangered;
+        min-width: 5rem;
+        display: inline-block;
+        font-family: monospace;
+    }
+    
+    .fileInfo {
+        font-size: 1rem;
+        position: absolute;
+        color: #141450;
+        top: 1rem;
+        right: 1rem;
+        width: 30%;
+    }
+
+    .dropZone {
+        background: lightgray;
+        width: 50rem;
+        /* height: 6rem; */
+        font-size: 8rem;
+        font-weight: 600;
+        text-align: center;
+        user-select: none;
+        border: dotted gray 0.2rem;
+        position: relative;
+        color: #565252
+    }
+
+    .dropBg, .dropBBg {
+        color: #131515;
+        font-size: 0.8rem;
+        position: absolute;
+        top: 0.5rem;
+        right: 50%;
+        transform: translateX(50%);
+    }
+
+    span.dropBBg {
+        /* color: #7d7777; */
+        bottom: 0.5rem;
+        top: inherit;
+    }
+
+    .ib {
+        display: inline-block;
+    }
+
+    body {
+        background-color: snow;
+    }
+
+    body div {
+        margin: 0.25rem;
+    }
+
+    #infoBox {
+        white-space: pre;
+    }
+
+    #infoBox table {
+        border-collapse: collapse;
+    }
+    
+    #infoBox table tbody tr:nth-child(odd) {
+        background-color: #d2d2d2;
+    }
+
+    #infoBox table td {
+        border: 3px solid #333A;
+        padding: .2rem .5rem;
+    }
+
+    .itemGrid {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        gap: 10px;
+        grid-auto-rows: minmax(50px, auto);
+    }
+
+    .itemImage {
+        filter: drop-shadow(5px 5px 4px #111);
+        width: 90px;
+        height: 90px;
+        position: relative;
+        object-fit: contain;
+    }
+
+    .itemImage img {
+        
+        object-fit: contain;
+    }
+
+    .itemImage[data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 10%;
+        top: 20%;
+        z-index: 1;
+        font-size: 14px;
+        color: white;
+    }
+
+    .itemImage.transparent {
+        opacity: 0.5;
+    }
+
+    .browserSourceBtn {
+        padding: 0.2rem 0.6rem;
+        color: white;
+        background: green;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        /* user-select: none; */
+        position: relative;
+    }
+
+    .browserSourceBtn:disabled {
+        background: gray;
+        user-select: none;
+    }
+
+    .browserSourceBtn::after {
+        content: 'Copied!';
+        background-color: black;
+        color: white;
+        position: absolute;
+        top: 0;
+        transform: translate(-50%, -130%);
+        left: 50%;
+        padding: 0.2rem;
+        opacity: 0;
+        transition: opacity 2s; 
+    }
+
+    .browserSourceBtn::before {
+        content: '';
+        /* background-color: red; */
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        width: 0;
+        height: 0;
+        border-left: .5rem solid transparent;
+        border-right: .5rem solid transparent;
+        border-top: .45rem solid black;
+        opacity: 0;
+        transition: opacity 2s;
+    }
+
+    .browserSourceBtn:active::after,
+    .browserSourceBtn:active::before {
+        opacity: 1;
+        transition: opacity 0s; 
+    }
+
+    .autoCircle {
+        background: red;
+        border-radius: 50% 50%;
+    }
+
+    .debugDisclaimer {
+        transform: translateX(-140px) rotate(-20deg);
+        position: absolute;
+        font-size: 180px;
+        writing-mode: vertical-rl;
+        opacity: 40%;
+        color: red;
+    }
+
+    .title {
+        font-size: 1.7rem;
+        font-weight: bold;
+        margin: 0
+    }
+
+    .step {
+        /* padding-top: 1rem; */
+        font-size: 1.1rem;
+        border-top: 1px solid #3336;
+        padding-top: 1rem;
+    }
+
+    .step .step_num {
+        font-size: 1.5rem;
+        color: navy;
+        font-weight: bold;
+    }
+
+    .save_loc {
+        background-color: #eaeaea;
+        font-family: system-ui;
+        /* color: #25124a; */
+        font-weight: 600;
+        padding: 0.2rem;
+    }
+
+</style>
+
+<body>
+    <div class="dropZone">+
+        <span class="dropBg">Drop save file .sl2 here</span>
+        <span class="dropBBg">Or double click and select a file</span>
+        <div class="fileInfo">
+            <p>File name: <span id="fileName" class="editProp"></span></p> 
+            <p>Updated: <span id="lastUpdated" class="editProp"></span></p>
+        </div>
+    </div>
+    
+    <div style="display: flex">
+        <div class="itemGrid" style="transform:scale(.7)">
+            <p class="debugDisclaimer">DEBUG</p>
+        </div>
+        
+        
+        <div>
+            <p class="title"> DS1:PTE / DS1R Auto-Item Tracker</p>
+            <p class="step">
+                <span class="step_num">1)</span>
+                Find your DS1 save file <span class="save_loc">Documents \ NBGI \ Dark Souls &ltRemastered&gt \ &ltDRAKS0005&gt.sl2</span>
+            </p>
+            <p class="step">
+                <span class="step_num">2)</span>
+                Drag and Drop the file to the gray zone
+            </p>
+            <p class="step">
+                <span class="step_num">3)</span>
+                Click or Copy this link <button class="browserSourceBtn" disabled>Waiting for File first</button>
+                and use as browser source
+            </p>
+            <p class="step">
+                Keep this page open and ENJOY!
+            </p>
+            <br/>
+            <p>Debug info <span class="infoState"></span></p>
+            <p id="infoBox"></p>
+            <p></p>
+        </div>
+    </div>
+</body>
+
+<script>
+    let fileHandle;
+    let actualFile;
+    let filePollTimeout = null;
+    const filePollTime = 2000;
+
+    let players = null;
+    let oldPlayers = null;
+
+    // Request ID & save in local storage
+    const baseUrl = (window.location.protocol != 'file:') ? 
+        'https://ds1.leagueautotimer.dev' : 'http://localhost:8081'
+    const currHostname = window.location.hostname
+    const displayUrl = '/display.html'
+    const keepAliveTimeout = 1000 * 10 * 1; // default to 15s keep alive
+    let spkID = null
+    let earID = null
+    let keepAliveTs = Date.now()
+    // TODO: Change timing of reserve & keep-alive to after file init 
+    let keepAliveInterval = null
+    
+    // Send key
+    function setUpSpeaker () {
+        console.log(`Sending key ${window.localStorage.getItem('DS1RandoMic_ID')}`)
+
+        fetch(`${baseUrl}/pickMic`, {method: 'POST', mode: 'cors', cache: 'no-cache', 
+            headers: {'Content-Type': 'text/plain'},
+            body: window.localStorage.getItem('DS1RandoMic_ID')}
+        ).then(resp => {
+            if (resp.status == 201) {
+                resp.text().then(text => {
+                    let sp_text = text.split(':')
+                    window.localStorage.setItem('DS1RandoMic_ID', sp_text[0])
+                    window.localStorage.setItem('DS1RandoMic_Spk', sp_text[1])
+                    console.log(`Updated keys to ${text}`)
+                })
+            } else {
+                console.log('Allowed to use key')
+            }
+            // resolve the button/auto stuff, and set values
+            spkID = parseInt(window.localStorage.getItem('DS1RandoMic_ID'))
+            earID = parseInt(window.localStorage.getItem('DS1RandoMic_Spk'))
+            console.log('Verified server conn')
+            copyDisplayLink.removeAttribute('disabled')
+            copyDisplayLink.textContent = `${currHostname}/${displayUrl}/?ear=${earID}`
+
+            keepAliveInterval =  setInterval( () => {
+                if (spkID && keepAliveTs < Date.now() - keepAliveTimeout ) {
+                    fetch(`${baseUrl}/speakMic`, 
+                        {method: 'POST', mode: 'cors', cache: 'no-cache', 
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({'spkID': spkID, 'keep-alive': true})}
+                    )
+                    keepAliveTs = Date.now()
+                    // console.log("Exec keep-alive")
+                }
+            }, keepAliveTimeout)
+
+        }, err => { // else something went wrong
+            infoBox.textContent = "Unable to connect to server."
+            console.log(err)
+            throw new Error('This cannot continue (cause server not available)')
+        })
+    }
+
+    let trackedPlayer = {} // this is a diff with player obj
+
+    // on-screen elements
+    const copyDisplayLink = document.querySelector('.browserSourceBtn');
+    copyDisplayLink.addEventListener('click', event => {
+        // copy url to clipboard
+        navigator.clipboard.writeText(`${displayUrl}/?ear=${earID}`)
+    })
+
+    const fileName = document.querySelector('#fileName')
+    const fileLastUpdated = document.querySelector('#lastUpdated')
+    const infoBox = document.querySelector('#infoBox')
+    const gridDiv = document.querySelector('.itemGrid')
+
+    const randomizerGrid = ["Lordvessel",         "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard",
+                      "Covenant of Artorias", "Key to Depths",       "Four Kings Bequeathed Lord Soul Shard", 
+                      "Peculiar Doll",       "Annex Key",           "Nito Lord Soul",
+                      "Broken Pendant",     "Light Source",         "Bed of Chaos Lord Soul",
+                      "Key to the Seal",  ,  "Basement Key",         
+                      "Blighttown Key",   "Crest of Artorias"]
+
+    const gridImgLink = {}
+    // generate item grid
+    for (let imgName of randomizerGrid) {
+        if (imgName) {
+            let imgEl = document.createElement('img')
+            imgEl.src = `img/${namedItemList[imgName]}.png`
+            imgEl.classList.add('transparent', 'itemImage')
+            gridDiv.appendChild(imgEl)
+            gridImgLink[imgName] = imgEl
+        } 
+        else gridDiv.appendChild(document.createElement('img'))
+    }
+
+    const profileSize = 0x060030;
+    const AES_KEY_BYTES = Uint8Array.from([0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10]).buffer;
+    const AES_IV_BLOCKLEN = 16; // 16 bytes
+    let AES_Crypto_Key = null;
+    let AES_Crypto_Promise = null; // Doing the crypto promise/etc once DSR save file is determined
+
+    const dropZone = document.querySelector('.dropZone')
+    dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "link";
+    })
+    dropZone.addEventListener('drop', async event => {
+        event.preventDefault();
+        
+        if (event.dataTransfer.items) {
+            for (let file of event.dataTransfer.items) {
+                if (file.kind === 'file') {
+                    fileHandle = await file.getAsFileSystemHandle();
+                    loadSaveFile(fileHandle)
+                    break
+                }
+            }
+        }
+    })
+
+    // TODO: Do some dragenter/dragdrop/blur styling in the future
+
+    //TODO: Too many async / awaits in this chain
+    document.querySelector('.dropZone').addEventListener('dblclick', async() => {
+        infoBox.textContent = "Checking";
+        [fileHandle] = await window.showOpenFilePicker() //TODO: add restrictions to file type
+        //TODO: Handle if the file is not valid & request is cancelled
+        loadSaveFile(fileHandle)
+    })
+
+    if (!window.showOpenFilePicker)
+        infoBox.textContent = "File System API not supported :( \n Please use latest version of Chrome";
+
+    async function loadSaveFile (fileHandle) {
+        // Load file & fileHandle
+        actualFile = await fileHandle.getFile()
+
+        if (await actualFile.slice(0, 4).text() == 'BND4') {
+            if (!spkID)
+                setUpSpeaker()
+            readBND4File(actualFile) 
+            updateFileProperties(actualFile)
+
+            // Start polling of the file 
+            clearInterval(filePollTimeout)
+            filePollTimeout = setInterval( async () => {
+                // poll file change every few seconds
+                if (! (await checkFileValid(actualFile)) ) {
+                    actualFile = await fileHandle.getFile()
+                    readBND4File(actualFile)
+                }
+                updateFileProperties(actualFile)
+            }, filePollTime)
+        } else {
+            console.error('This is not a valid BND4 file')
+            infoBox.textContent = "This doesn't appear to be a DS1 Save File"
+        }
+    }
+
+    async function checkFileValid (file) {
+        try {
+            let filetext = await file.slice(0, 1).text() // 1 byte
+        } catch (exception) {
+            return false // File is not readable due to on-disk modification, reload fileHandle
+        }
+        return true
+    }
+
+    function updateFileProperties (file) {
+        // takes File NOT FileHandle
+        fileName.textContent = actualFile.name
+        fileLastUpdated.textContent =  `${parseToTimeElapsed(Date.now() - actualFile.lastModified)}ago`
+    }
+
+    function parseToTimeElapsed (ms) {
+        let timestr = ""
+        const sec = 1000
+        const min = sec * 60
+        const hr = min * 60
+        const day = hr * 24
+        if (ms > day) {
+            timestr += `${Math.floor(ms/day)}d `
+            ms = ms % day
+        }
+        if (ms > hr) {
+            timestr += `${Math.floor(ms/hr)}h `
+            ms = ms % hr
+        }
+        if (ms > min) {
+            timestr += `${Math.floor(ms/min)}m `
+            ms = ms % min
+        }
+        if (ms > sec) {
+            timestr += `${Math.floor(ms/sec)}s `
+            ms = ms % sec
+        }
+        return timestr
+    }
+
+    //TODO: convert to Readable Stream, maybe faster?
+    async function readBND4File (file) {
+        // Adapted from gabtoubl's js port
+
+        let b_idx = 0;
+        skipBytes = (bytes) => b_idx += bytes
+        read = (start, bytes) => file.slice(start, bytes)
+
+        let format = await file.slice(0, 4).text() // format at position 0, UTF-8
+        if (format != 'BND4') {
+            console.warn('Not a valid DS1 save file, missing BND4 tag')
+            return
+            // TODO: Display warning in GUI
+        }
+
+        b_idx = 0x18; // version offset
+        let version = await file.slice(b_idx, b_idx+8).text()
+        console.log(`version: ${version}`)
+
+        if (version == '00000001') {
+            console.info('Appears to be a DS1:PTDE save file')
+        } else if (version == '\0\0\0\0\0\0\0\0') { //DSR has null data where the version no. is
+            console.info('Appears to be a DS1:R save file')
+            if (window.crypto && window.crypto.subtle) { // Generating a key via a promise
+                AES_Crypto_Promise = window.crypto.subtle.importKey('raw', AES_KEY_BYTES, {'name':'AES-CBC'}, false, ['decrypt'])
+                console.info('Starting up AES decryption')
+            } else { 
+                console.warn('This browser does not support the crypto module; please update!') //It was released in 2014, what you doing
+                return
+            }
+        }
+
+        b_idx = 0x50; // container header data starts at 0x40, going straight to the start offset at 0x50
+        profileStartOffset = []
+        // Capture player/profile offsets
+        for (let i=0; i<11; i++) {
+            profileStartOffset.push( new Uint32Array(await file.slice(b_idx, b_idx+4).arrayBuffer())[0] ); // convert to int (use int8array)
+            b_idx += 32; // containers are 32 bytes high/long
+        }
+        // 11th header is for grabbing some additional stuff
+        console.log(profileStartOffset)
+
+        oldPlayers = players
+        players = []
+
+        // Start reading player/profiles
+        // TODO: Change performance data to use measure & etc
+        // TODO: Need to rewrite the async logic SO player parse is parallel & has early out
+        let pt = performance.now()
+        for (let i=0; i<10; i++) {
+            let savedPlayer = null;
+            if (version == '00000001') {
+                let p1 = performance.now()
+                savedPlayer = await readPlayerData(file.slice(profileStartOffset[i], profileStartOffset[i]+profileSize))
+                console.log(`DS1 player took ${performance.now() - p1}`)
+            } else {
+                let p2 = performance.now()
+                let saveSlotBlob = file.slice(profileStartOffset[i], profileStartOffset[i]+profileSize)
+                let saveSlotPromise = saveSlotBlob.slice(AES_IV_BLOCKLEN).arrayBuffer()
+                let profile_IV = await saveSlotBlob.slice(0, AES_IV_BLOCKLEN).arrayBuffer()
+
+                AES_Crypto_Key = (!AES_Crypto_Key) ? await AES_Crypto_Promise : AES_Crypto_Key
+
+                let saveSlotData = new Uint8Array(await saveSlotPromise)
+                let decryptSaveSlotBuffer = await window.crypto.subtle.decrypt( {name: 'AES-CBC', iv: profile_IV}, AES_Crypto_Key, saveSlotData)
+
+                let decryptSaveSlotBlob = new Blob([decryptSaveSlotBuffer])
+                console.log(`DSR player decrypt ${performance.now() - p2}ms`)
+
+                savedPlayer = await readPlayerData(decryptSaveSlotBlob.slice(8)) // For some UNGODLY reason, this is offset by 8 bytes.
+                // Maybe I messed something; however I am using the offsets properly and aes-128-cbc uses 16 byte blocks minimum
+                // I don't know if the data / format is different, how much it's different.
+                console.log(`DSR player took ${performance.now() - p2}ms`)
+            }
+            if (!savedPlayer) break
+        }
+        console.log(`All players took ${performance.now() - pt}ms`, players)
+
+        // Now lets compare the hashes and see if there was a change
+        calculatePlayerDiff()
+    }
+
+    async function readPlayerData(file) {
+        let p = performance.now()
+
+        let playerHeaderBuffer = await file.slice(0, 0x170).arrayBuffer() // read player data from the blob
+        let player = {}
+        player.headerHash = 0
+        player.level = new Uint32Array(playerHeaderBuffer, 0xE8, 1)[0];
+        if (player.level == 0) {
+            console.warn('Level 0 player detected')
+            return false //TODO: Should skip this unless its a good trigger
+        }
+        
+        player.souls = new Uint32Array(playerHeaderBuffer, 0xec, 1)[0];
+        player.name8 = String.fromCharCode(...new Uint16Array(playerHeaderBuffer, 0x100, 14)) // name via UTF-16
+        
+        // gotta check for null-chars cause of C-strings
+        let nullCharIdx = player.name8.indexOf(String.fromCharCode(0))
+        player.name = (nullCharIdx > 0) ? player.name8.substring(0, nullCharIdx) : player.name8 // assuming name is not null here
+        players.push(player)
+
+        // simple hash for player comparison NOTE: None of this is unique, I don't know what values to use to verify.
+        player.headerHash = player.name + String.fromCharCode(player.souls >> 16, player.souls & 0xFFFF, player.level, )
+
+        console.log(`player ${player.name} computed header in ${performance.now()-p}ms`)
+
+        // Read item list
+        const backpackOffset = 0x2E0
+        const backpackEndOffset = 0xE2E0
+        player.items = {}
+        player.keyItems = []
+        player.itemHash = ''
+        p = performance.now()
+        let backpackArrayBuffer = (await file.slice(backpackOffset, backpackOffset + backpackEndOffset).arrayBuffer())
+
+        for (let item_idx = 0; item_idx + backpackOffset < backpackEndOffset; item_idx += 4*7) {
+            let item = {}
+            let id = new Uint32Array(backpackArrayBuffer, item_idx+4, 1)[0]
+            // TODO: After ~100 0xFFFFFFFF item ids I should quit the item check, however item check completes in <10ms on my machine
+            // so skipping ~400 items might not save much time
+
+            if (id < 0xFFFFFFFF) { // empty slots have MAX_32_INT value
+                if (keyItemList[id]) {
+                    item.name = keyItemList[id].name // only key item list lookup
+                    if (id == 190000 || id == 1396000)
+                        player.keyItems.push("Light Source")
+                    else 
+                        player.keyItems.push(keyItemList[id].name) // set value for diffs later
+                }
+                // there can be the same item in 2 slots but IDK
+                item.amount = new Uint32Array(backpackArrayBuffer, item_idx+8, 1)[0]
+                // NOTE: I don't care about item type but note item ids are not unique 
+                item.have = (0 != new Uint32Array(backpackArrayBuffer, item_idx + 16, 1)[0]) // convert to boolean
+                player.items[id] = item
+                player.itemHash += String.fromCharCode(id, item.amount, item.have)
+            }
+        }
+
+        console.log(`player ${player.name} computed items in ${performance.now()-p}ms`)
+        return true
+    }
+
+    function calculatePlayerDiff() {
+
+        if (!players.length) {
+            infoBox.textContent = 'No players found'
+            return
+        }
+
+        // Diff player data with latest parsed data
+        let playerStats = []
+        for (let player of players) {
+            // playerStats.push(`${player.name}: \tLv. ${player.level} \t| ${player.souls} souls \t| ${Object.keys(player.items).length} items `)
+            playerStats.push(`<tr><td>${player.name}</td> <td>${player.level}</td><td>${player.souls} souls</td> <td>${Object.keys(player.items).length} items </td>`)
+        }
+
+        /*
+            null        -> nothing
+            players     -> display player stats + trackLastPlayer
+            old + players -> show stats + trackUpdated player
+        */
+
+        let nTrackedPlayer = null
+        if (oldPlayers) {
+            for (let i=0; i<players.length; i++) {
+                if (oldPlayers[i] && oldPlayers[i].name == players[i].name) {
+                    playerStats[i] += '<td>F</td>'
+                    
+                    if (oldPlayers[i].headerHash != players[i].headerHash) {
+                        playerStats[i] += '<td>H</td>'
+                        nTrackedPlayer = players[i]
+                    }
+                    if (oldPlayers[i].itemHash != players[i].itemHash) {
+                        playerStats[i] += '<td>I</td>'
+                        nTrackedPlayer = players[i]
+                    }
+                }
+                playerStats[i] += '</tr>'
+            }
+        }
+        
+        infoBox.innerHTML = `<table> <thead><th>Name</th> <th>Level</th> <th>Souls</th> <th>Items</th> <th>Track</th></thead>
+            ${playerStats.join('\n')} </table><br/>`
+
+        nTrackedPlayer = nTrackedPlayer || players[players.length-1]
+
+        //nTrackedPlayer either last changed or last new
+        if (trackedPlayer && trackedPlayer.name == nTrackedPlayer.name) { // verify its the same player
+            infoBox.innerHTML += `Tracking ${nTrackedPlayer.name} ...\n`
+        } else {
+            trackedPlayer = null // reset tracked player, causes intersect to do a catch-up
+            infoBox.innerHTML += `Watching ${nTrackedPlayer.name}`
+        }
+
+        // do set intersect
+        let initKeyItems = (trackedPlayer && trackedPlayer.keyItems) || []
+        let keyItemIntersect = nTrackedPlayer.keyItems.filter(ki => !initKeyItems.includes(ki))
+
+        // send update and let client figure out
+        if (spkID) {
+            fetch(`${baseUrl}/speakMic`, 
+                {method: 'POST', mode: 'cors', cache: 'no-cache', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({'spkID': spkID, 'player': nTrackedPlayer})}
+            )
+            keepAliveTs = Date.now()
+            console.log("Updated Save-Data")
+        }
+        // NOTE: I could compress & only send diffs, but its ~ 500B which is nothing
+
+        for (let imgLink in gridImgLink) {
+            if (nTrackedPlayer.keyItems.includes(imgLink))
+                gridImgLink[imgLink].classList.remove('transparent')
+            else
+                gridImgLink[imgLink].classList.add('transparent')
+        }
+
+        trackedPlayer = nTrackedPlayer
+    }
+
+
+</script>
+</html>
