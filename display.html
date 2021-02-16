@@ -143,7 +143,7 @@
 	// Set up the Event Source to listen for player events
 	const baseUrl = (window.location.protocol != 'file:') ? 
         'https://ds1.leagueautotimer.dev' : 'http://localhost:8081'
-	let earID = new URLSearchParams(window.location.search).get('ear')
+	let earID = parseInt(new URLSearchParams(window.location.search).get('ear'))
 	const saveDataListener = new EventSource(`${baseUrl}/listen?ear=${earID}`)
 
 	saveDataListener.addEventListener('No-Speaker', (event) => {

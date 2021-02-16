@@ -43,7 +43,7 @@ const registerClient = (req, res) => {
 	res.set(corsHeaders)
 
 	let lisID =  parseInt(req.query['ear']) // parse the client id from route
-	if (!lisID) {
+	if (!Number.isInteger(lisID)) {
 		server_log(`lisID not found ${lisID}`)
 		res.status(500).send('No Listen ID')
 		return
@@ -64,8 +64,8 @@ const registerClient = (req, res) => {
 	sseClients++
 
 	res.on('close', () => {
-		server_log('Connection closed.')
-		if (lisID && speakerRegistry[lisID]) {
+		server_log(`Connection [${res.ip}] closed.`)
+		if (Number.isInteger(lisID) && speakerRegistry[lisID]) {
 			let c_idx = speakerRegistry[lisID].clients.indexOf(res)
 			delete speakerRegistry[lisID].clients[c_idx]
 			vectorArray(speakerRegistry[lisID].clients) // remove empty
@@ -83,17 +83,17 @@ const registerClient = (req, res) => {
 const registerSpeaker = (req, res) => {
 	// ask for an ID, if not then it will be provided for you
 	let spkID = parseInt(req.body)
-	server_log(`spkID ask: ${req.body}`)
+	server_log(`spkID ask: ${spkID}`)
 	let lisID = null
 	
 	res.set(corsHeaders);
 
-	if (spkID && speakerIDHash[spkID] && spkID == speakerIDHash[spkID].id) {
+	if (Number.isInteger(spkID) && speakerIDHash[spkID] && spkID == speakerIDHash[spkID].id) {
 		// if save exists, link exists AND id is correct
 		console.log(`Unncessary Override ${spkID}`)
 		res.sendStatus(204)
 		return
-	} else if (spkID) {
+	} else if (Number.isInteger(spkID)) {
 		lisID = ((spkID>>24 & 0xFF) + (spkID>>16 & 0xFF) + 
 				 (spkID>>8 & 0xFF) + (spkID & 0xFF)) % maxHashTables
 		// if occupied / invalid, revoke
@@ -101,7 +101,7 @@ const registerSpeaker = (req, res) => {
 			spkID = null 
 	}
 	
-	if (!spkID) { // Generate new speaker ID
+	if (Number.isInteger(spkID)) { // Generate new speaker ID
 		lisID = -1 // Find available listener slot
 		while (++lisID < speakerRegistry.length) {
 			if (!speakerRegistry[lisID])
@@ -205,10 +205,10 @@ server.get('/listen', registerClient)
 
 server.get('/dumpinfo', (req, res) => {
 	server_log(`[${req.ip}] requested info`)
-	let info = `Mic: ${Object.keys(speakerIDHash).length} | Wait-Lis: ${awaitingSpeaker.size}\n\n`
+	let info = `Mic: ${Object.keys(speakerIDHash).length} | Wait-Lis: ${awaitingSpeaker.size} | Total clients: ${sseClients}\n\n`
 	for (let slot in speakerIDHash) {
 		info += `slot: ${slot} `
-		info += `\n  ts: ${new Date(speakerIDHash[slot].ts)}\n  lis: ${speakerIDHash[slot].clients.length}\n` //${JSON.stringify(speakerIDHash[slot], null, 2)}
+		info += `\n  ts: ${new Date(speakerIDHash[slot].ts).toUTCString()}\n  lis: ${speakerIDHash[slot].clients.length}\n` 
 		if (speakerIDHash[slot].data)
 			info += `  player: ${speakerIDHash[slot].data.name}\n`
 	}

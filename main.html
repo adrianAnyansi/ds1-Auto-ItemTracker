@@ -258,7 +258,7 @@
     // Request ID & save in local storage
     const baseUrl = (window.location.protocol != 'file:') ? 
         'https://ds1.leagueautotimer.dev' : 'http://localhost:8081'
-    const currHostname = window.location.hostname
+    const currHostname = window.location.origin
     const displayUrl = '/display.html'
     const keepAliveTimeout = 1000 * 10 * 1; // default to 15s keep alive
     let spkID = null
@@ -268,15 +268,17 @@
     let keepAliveInterval = null
     
     // Send key
-    function setUpSpeaker () {
+    async function setUpSpeaker () {
         console.log(`Sending key ${window.localStorage.getItem('DS1RandoMic_ID')}`)
 
         fetch(`${baseUrl}/pickMic`, {method: 'POST', mode: 'cors', cache: 'no-cache', 
             headers: {'Content-Type': 'text/plain'},
             body: window.localStorage.getItem('DS1RandoMic_ID')}
-        ).then(resp => {
+        ).then(async resp => {
+            
+            let IDPromise = null
             if (resp.status == 201) {
-                resp.text().then(text => {
+                IDPromise = resp.text().then(text => {
                     let sp_text = text.split(':')
                     window.localStorage.setItem('DS1RandoMic_ID', sp_text[0])
                     window.localStorage.setItem('DS1RandoMic_Spk', sp_text[1])
@@ -284,13 +286,18 @@
                 })
             } else {
                 console.log('Allowed to use key')
+                IDPromise = Promise.resolve(true)
             }
+
+            // console.log(IDPromise)
+
+            await IDPromise;
             // resolve the button/auto stuff, and set values
             spkID = parseInt(window.localStorage.getItem('DS1RandoMic_ID'))
             earID = parseInt(window.localStorage.getItem('DS1RandoMic_Spk'))
             console.log('Verified server conn')
             copyDisplayLink.removeAttribute('disabled')
-            copyDisplayLink.textContent = `${currHostname}/${displayUrl}/?ear=${earID}`
+            copyDisplayLink.textContent = `${currHostname}${displayUrl}?ear=${earID}`
 
             keepAliveInterval =  setInterval( () => {
                 if (spkID && keepAliveTs < Date.now() - keepAliveTimeout ) {
@@ -489,7 +496,7 @@
             b_idx += 32; // containers are 32 bytes high/long
         }
         // 11th header is for grabbing some additional stuff
-        console.log(profileStartOffset)
+        // console.log(profileStartOffset)
 
         oldPlayers = players
         players = []

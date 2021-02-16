@@ -1,27 +1,28 @@
 # DS1 Item Auto Tracker
 
-Q: What is this?
+Q: What is this?  
 A: It's a online DS1 Item tracker, designed primarily for Item randomizers. The website tracks key items to display as a stream overlay. This only works in Chrome due to the FileSystem API.
 
-Q: How do I use it?
+Q: How do I use it?  
 A: Go to this website <website>, and then just follow the instructions! Add your DS1 or DS Remastered save file, and it will automatically start tracking the latest character. Copy the generated link as a browser source to use the overlay.
 
-Q: Ok but how does it work?
+Q: Ok but how does it work?  
 A: Souls games auto save like every 2 seconds. So by reading the save file constantly, I can tell what items you have and display them.
 
-Q: The tracker picked the wrong player.
+Q: The tracker picked the wrong player.  
 A: By default the tracker picks the last save slot at first. Once one of the characters is updated, then it will pick the character being played. 
 
-Q: Is there a manual mode?
+Q: Is there a manual mode?  
 A: There isn't at the moment, it will be added on request.
 
-Q: Can I customize the displayed items?
+Q: Can I customize the displayed items?  
 A: Will be added on request. I need to create a system for adding/removing items.
 
-Q: So where can I request these things? Or report bugs?
+Q: So where can I request these things? Or report bugs?  
 A: Either by email tobe.anyansi@gmail.com OR make an issue at the github page. Thanks!
 
-Q: Why didnt you just build this for Emotracker? 
+Q: Why didnt you just build this for Emotracker?  
+A: Dunno how to build for it, and it would take too long. Also it seems Emotracker has a convoluted way of displaying a transparent webpage which doesn't work for OBS. If there's a better way, just let me know.
 
 # MVP
     Think I'm done
@@ -29,7 +30,7 @@ Q: Why didnt you just build this for Emotracker?
     Clean up Speaker UI
         Clean up infoBox
             better ui for tracking?
-        Add auto* indicator
+        Add connection info
     
     More thorough testing 
         speaker emit/reconnect
@@ -38,7 +39,7 @@ Q: Why didnt you just build this for Emotracker?
 
     Check transparent on DS background
 
-    Test with DSR
+    Test with DSR??
 
 # Barb's old list
         Lordvessel | Orange Charred Ring | Seath Lord Soul
