@@ -232,7 +232,7 @@
             </p>
             <p class="step">
                 <span class="step_num">3)</span>
-                Click or Copy this link <button class="browserSourceBtn" disabled>Waiting for File first</button>
+                Click to copy this link <button class="browserSourceBtn" disabled>Waiting for File first</button>
                 and use as browser source
             </p>
             <p class="step">
@@ -261,6 +261,7 @@
     const currHostname = window.location.origin
     const displayUrl = '/display.html'
     const keepAliveTimeout = 1000 * 10 * 1; // default to 15s keep alive
+    let fetchIDPromise = null
     let spkID = null
     let earID = null
     let keepAliveTs = Date.now()
@@ -271,7 +272,7 @@
     async function setUpSpeaker () {
         console.log(`Sending key ${window.localStorage.getItem('DS1RandoMic_ID')}`)
 
-        fetch(`${baseUrl}/pickMic`, {method: 'POST', mode: 'cors', cache: 'no-cache', 
+        fetchIDPromise = fetch(`${baseUrl}/pickMic`, {method: 'POST', mode: 'cors', cache: 'no-cache', 
             headers: {'Content-Type': 'text/plain'},
             body: window.localStorage.getItem('DS1RandoMic_ID')}
         ).then(async resp => {
@@ -324,7 +325,7 @@
     const copyDisplayLink = document.querySelector('.browserSourceBtn');
     copyDisplayLink.addEventListener('click', event => {
         // copy url to clipboard
-        navigator.clipboard.writeText(`${displayUrl}/?ear=${earID}`)
+        navigator.clipboard.writeText(`${currHostname}${displayUrl}?ear=${earID}`)
     })
 
     const fileName = document.querySelector('#fileName')
@@ -536,6 +537,19 @@
 
         // Now lets compare the hashes and see if there was a change
         calculatePlayerDiff()
+
+        // send update and let client figure out
+        fetchIDPromise.then(() => {
+        // if (spkID) {
+            fetch(`${baseUrl}/speakMic`, 
+                {method: 'POST', mode: 'cors', cache: 'no-cache', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({'spkID': spkID, 'player': trackedPlayer})}
+            )
+            keepAliveTs = Date.now()
+            console.log("Updated Save-Data")
+        })
+        // NOTE: I could compress & only send diffs, but its ~ 500B which is nothing
     }
 
     async function readPlayerData(file) {
@@ -654,18 +668,6 @@
         // do set intersect
         let initKeyItems = (trackedPlayer && trackedPlayer.keyItems) || []
         let keyItemIntersect = nTrackedPlayer.keyItems.filter(ki => !initKeyItems.includes(ki))
-
-        // send update and let client figure out
-        if (spkID) {
-            fetch(`${baseUrl}/speakMic`, 
-                {method: 'POST', mode: 'cors', cache: 'no-cache', 
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({'spkID': spkID, 'player': nTrackedPlayer})}
-            )
-            keepAliveTs = Date.now()
-            console.log("Updated Save-Data")
-        }
-        // NOTE: I could compress & only send diffs, but its ~ 500B which is nothing
 
         for (let imgLink in gridImgLink) {
             if (nTrackedPlayer.keyItems.includes(imgLink))
