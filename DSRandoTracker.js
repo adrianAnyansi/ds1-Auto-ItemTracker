@@ -62,9 +62,10 @@ const registerClient = (req, res) => {
 		res.write(`event: No-Speaker\ndata: \n\n`)
 	}
 	sseClients++
+	res.ip = req.ip
 
 	res.on('close', () => {
-		server_log(`Connection [${res.ip}] closed.`)
+		server_log(`Connection [${res.ip}] closed.`) 
 		if (Number.isInteger(lisID) && speakerRegistry[lisID]) {
 			let c_idx = speakerRegistry[lisID].clients.indexOf(res)
 			delete speakerRegistry[lisID].clients[c_idx]

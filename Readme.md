@@ -4,7 +4,7 @@ Q: What is this?
 A: It's a online DS1 Item tracker, designed primarily for Item randomizers. The website tracks key items to display as a stream overlay. This only works in Chrome due to the FileSystem API.
 
 Q: How do I use it?  
-A: Go to this website <website>, and then just follow the instructions! Add your DS1 or DS Remastered save file, and it will automatically start tracking the latest character. Copy the generated link as a browser source to use the overlay.
+A: Go to this website https://ds1-auto-tracker.s3.us-east-2.amazonaws.com/main.html, and then just follow the instructions! Add your DS1 or DS Remastered save file, and it will automatically start tracking the latest character. Copy the generated link as a browser source to use the overlay.
 
 Q: Ok but how does it work?  
 A: Souls games auto save like every 2 seconds. So by reading the save file constantly, I can tell what items you have and display them.
@@ -41,7 +41,7 @@ A: Dunno how to build for it, and it would take too long. Also it seems Emotrack
 
     Test with DSR??
 
-# Barb's old list
+# Current list
         Lordvessel | Orange Charred Ring | Seath Lord Soul
         Convenant of Artioas | Key to Depths | 4 Kings Lord Soul 
         Painted Doll | Annex Key (A) | Nito Lord Soul
@@ -59,12 +59,10 @@ A: Dunno how to build for it, and it would take too long. Also it seems Emotrack
 
 361F9 unknown
 
-003C12C0 This seems to be the elapsed time, thank god lol
-I spent 5 hours looking for this
-However its not in the player slot meaning the offset is gonna suck
-a lot
-also i bet it doesnt get changed until you exit the game as its part of the save slot
-therefore it's probably useless
+003C12C0 This seems to be the elapsed time displayed on the save slot  
+I spent 5 hours looking for this  
+However not only is it in a different location from regular player data but it also doesn't update until you quit out (i think?)
+Not going to go into further detail with this as it doesnt update on game start anyway
 
 003C10D4
 
