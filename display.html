@@ -10,6 +10,8 @@
 
 	body {
 		background-color: #222222;
+		font-family: "Cambria, Georgia";
+		text-shadow: 2px 2px 3px black;
 	}
 
 	body div {
@@ -46,13 +48,13 @@
 
 	.autoText {
     	font-size: 1.6rem;
-		font-family: fantasy;
+		/* font-family: fantasy; */
 	}
 
 	#infoBox {
 		font-size: 1.1rem;
 		white-space: pre-wrap;
-		font-family: fantasy;
+		/* font-family: fantasy; */
 	}
 
 	.autoText, #infoBox {
@@ -63,7 +65,7 @@
 
 	.autoCircle {
 		background: red;
-		filter: blur(2px);
+		filter: blur(1px);
 		border-radius: 50% 50%;
 		min-width: 1rem;
     	min-height: 1rem;
@@ -85,6 +87,11 @@
 		
 	}
 
+	.autoVersion {
+		color: gray;
+		text-shadow: none;
+	}
+
 </style>
 
 <body>
@@ -98,6 +105,7 @@
 				<span class="autoCircle disabled ib"></span>
 				<span class="ib autoText">AUTO</span>
 			</div>
+			<span class="autoVersion">ds1-auto-tracker 1.1</span>
 			<p id="infoBox"></p>
 			<p></p>
 		</div>
@@ -190,9 +198,9 @@
 
 	saveDataListener.addEventListener('error', event => {
 		retryTimeout++ 
-		
-		if (!earID) { 
-			infoBox.textContent = "earID param is unset"
+
+		if (!Number.isInteger(earID)) {
+			infoBox.textContent = `ear param is unset. \nIf the link you have does not end with ear=# where # is a number\nor ear=NaN, send me an email!`	
 			saveDataListener.close()
 			return
 		} else if (retryTimeout < 50) {
@@ -200,7 +208,7 @@
 			infoBox.textContent = "Connecting..."
 		} else {
 			console.log(`Can't connect to server.`)
-			infoBox.textContent = "Failed to connect to server"
+			infoBox.textContent = "Failed to connect to server."
 			saveDataListener.close()
 		}
 		autoCirle.classList.add('disabled')

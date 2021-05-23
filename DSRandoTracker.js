@@ -1,6 +1,9 @@
+const e = require('express');
 const express = require('express');
 const server = express();
+const fs = require('fs')
 const port = 8081;
+let readSecret = ''
 
 const min = 1000 * 60;
 
@@ -38,6 +41,7 @@ const eventStreamHeaders = {
 
 server.use(express.text())
 
+// listeners
 const registerClient = (req, res) => {
 	res.set(eventStreamHeaders);
 	res.set(corsHeaders)
@@ -65,7 +69,7 @@ const registerClient = (req, res) => {
 	res.ip = req.ip
 
 	res.on('close', () => {
-		server_log(`Connection [${res.ip}] closed.`) 
+		server_log(`Connection [${req.ip}] closed. LisId ${lisID}`) 
 		if (Number.isInteger(lisID) && speakerRegistry[lisID]) {
 			let c_idx = speakerRegistry[lisID].clients.indexOf(res)
 			delete speakerRegistry[lisID].clients[c_idx]
@@ -84,14 +88,14 @@ const registerClient = (req, res) => {
 const registerSpeaker = (req, res) => {
 	// ask for an ID, if not then it will be provided for you
 	let spkID = parseInt(req.body)
-	server_log(`spkID ask: ${spkID}`)
+	server_log(`[${req.ip}] spkID ask: ${spkID}`)
 	let lisID = null
 	
 	res.set(corsHeaders);
 
 	if (Number.isInteger(spkID) && speakerIDHash[spkID] && spkID == speakerIDHash[spkID].id) {
 		// if save exists, link exists AND id is correct
-		console.log(`Unncessary Override ${spkID}`)
+		server_log(`Unncessary Override ${spkID}`)
 		res.sendStatus(204)
 		return
 	} else if (Number.isInteger(spkID)) {
@@ -102,7 +106,7 @@ const registerSpeaker = (req, res) => {
 			spkID = null 
 	}
 	
-	if (Number.isInteger(spkID)) { // Generate new speaker ID
+	if (!Number.isInteger(spkID)) { // Generate new speaker ID
 		lisID = -1 // Find available listener slot
 		while (++lisID < speakerRegistry.length) {
 			if (!speakerRegistry[lisID])
@@ -164,7 +168,7 @@ const processSpeakerUpdate = (req, res) => {
 		}
 		res.sendStatus(200)
 	} else {
-		console.log(`Given invalid spkID ${spkID}`)
+		server_log(`[${req.ip}] Given invalid spkID ${spkID}`)
 		res.sendStatus(401)
 	}
 }
@@ -205,15 +209,20 @@ server.options('/speakMic', (req, res) => {
 server.get('/listen', registerClient)
 
 server.get('/dumpinfo', (req, res) => {
-	server_log(`[${req.ip}] requested info`)
-	let info = `Mic: ${Object.keys(speakerIDHash).length} | Wait-Lis: ${awaitingSpeaker.size} | Total clients: ${sseClients}\n\n`
-	for (let slot in speakerIDHash) {
-		info += `slot: ${slot} `
-		info += `\n  ts: ${new Date(speakerIDHash[slot].ts).toUTCString()}\n  lis: ${speakerIDHash[slot].clients.length}\n` 
-		if (speakerIDHash[slot].data)
-			info += `  player: ${speakerIDHash[slot].data.name}\n`
+	if (req.hostname == 'localhost' || req.query['secret'] != readSecret) {
+		server_log(`[${req.ip}] requested info`)
+		let info = `Mic: ${Object.keys(speakerIDHash).length} | Wait-Lis: ${awaitingSpeaker.size} | Total clients: ${sseClients}\n\n`
+		for (let slot in speakerIDHash) {
+			lisID = ((slot>>24 & 0xFF) + (slot>>16 & 0xFF) + (slot>>8 & 0xFF) + (slot & 0xFF)) % maxHashTables
+			info += `slot: ${slot} : lisID ${lisID}`
+			info += `\n  ts: ${new Date(speakerIDHash[slot].ts).toUTCString()}\n  lis: ${speakerIDHash[slot].clients.length}\n` 
+			if (speakerIDHash[slot].data)
+				info += `  player: ${speakerIDHash[slot].data.name}\n`
+		}
+		res.status(200).send(info)
+	} else {
+		res.sendStatus(401)
 	}
-	res.status(200).send(info)
 })
 
 // Utilty funcitons
@@ -243,6 +252,14 @@ function vectorArray(arr) {
 
 
 server.listen(port, () => {
+	fs.readFile('secret.txt', 'utf8', (err, data) => {
+		if (err) {
+			server_log(`No secret was found on start-up`);
+			console.error(err)
+		}
+		else readSecret = data
+	})
+
 	server_log(`Server listening at ${port}`)
 	setInterval(prune, 0.5*min)
 })

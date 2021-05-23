@@ -69,12 +69,17 @@
     }
     
     #infoBox table tbody tr:nth-child(odd) {
-        background-color: #d2d2d2;
+        background-color: #e2e2e2;
     }
 
     #infoBox table td {
-        border: 3px solid #333A;
+        border: 2px solid #333A;
         padding: .2rem .5rem;
+    }
+
+    #infoState {
+        font-size: 1.1rem;
+        font-weight: bold;
     }
 
     .itemGrid {
@@ -115,8 +120,8 @@
         /* padding: 0.2rem 0.6rem; */
         padding: 0;
         color: black;
-        background: #80808038;
-        border: 2px solid slateblue;
+        background: #d8d8d838;
+        border: 2px solid #46415f;
         font-weight: bold;
         text-align: center;
         cursor: pointer;
@@ -125,10 +130,16 @@
         width: 100%;
         font-size: 0.9rem;
         height: 2rem;
+        transition: border 0.2s, background 0.2s;
         /* border-radius: 0 0 15% 15%; */
     }
 
-    .hangLeft {
+    .browserSourceBtn:hover {
+        background: #94bfff38;
+        border: 2px solid #3334e2;
+    }
+
+    /* .hangLeft {
         background-color: #000C;
         font-family: monospace;
         color: snow;
@@ -138,16 +149,15 @@
         padding: 0.1rem 0.3rem;
         font-size: 1.2rem;
         cursor: pointer;
-        /* display: inline-block; */
-        /* left: 0; */
-        /* position: absolute; */
-    }
+    } 
+    */
 
     .browserSourceBtn:disabled + .hangLeft {
         cursor: not-allowed;
     }
 
     .browserSourceBtn:disabled {
+        color: #504c4c;
         --dark-bg: #EEE3;
         --light-bg: #3033;
         background: repeating-linear-gradient(135deg, var(--light-bg), var(--light-bg) 10px, var(--dark-bg) 10px, var(--dark-bg) 20px, var(--light-bg) 20px);
@@ -168,7 +178,8 @@
         transition: opacity 2s; 
     }
 
-    .browserSourceBtn::before {
+
+    .browserSourceBtn::before { /* This is the tiny triangle btw*/
         content: '';
         /* background-color: red; */
         position: absolute;
@@ -188,6 +199,7 @@
     .browserSourceBtn:active::before {
         opacity: 1;
         transition: opacity 0s; 
+        content: 'Copied!';
     }
 
     .autoCircle {
@@ -210,6 +222,11 @@
         margin: 0;
         font-family: system-ui;
         color: #3e4042;
+    }
+
+    .title span {
+        font-size: 0.7rem;
+        font-weight: bold;
     }
 
     .step {
@@ -262,7 +279,7 @@
 <body>
     
     <div style="display: flex">
-        <div class="itemGrid" style="transform:scale(.7)">
+        <div class="itemGrid" style="">
             <p class="debugDisclaimer">DEBUG</p>
         </div>
         
@@ -277,7 +294,7 @@
                 </div>
             </div>
 
-            <p class="title"> DS1:PTE / DS1R Auto-Item Tracker</p>
+            <p class="title"> DS1:PTE / DS1R Auto-Tracker<span class="version">1.1</span></p>
             <div id="steps">
             <p class="step">
                 <span class="step_num">1</span> Find your DS1 <span class="bold">save file</span> at <br/>
@@ -292,7 +309,7 @@
             <p class="step" style="position:relative">
                 <span class="step_num">3</span>
                 <span class="bold">Click</span> and Copy this link to use as a <span class="bold">browser source</span> <br/>
-                <div style="display:flex">
+                <div style="display:flex" id="browserHolder">
                     <button class="browserSourceBtn" disabled>Waiting...</button>
                     <!-- <button class="hangLeft" disabled>Copy</button> -->
                 </div>
@@ -301,7 +318,7 @@
                 <span class="step_num">4</span>
                 Keep this page <span class="bold">open</span> and ENJOY!
             </p>
-            <p>Debug info <span class="infoState"></span></p>
+            <p>Debug info: <span id="infoState"></span></p>
             <p id="infoBox"></p>
             
             </div>
@@ -349,9 +366,12 @@
                     window.localStorage.setItem('DS1RandoMic_Spk', sp_text[1])
                     console.log(`Updated keys to ${text}`)
                 })
-            } else {
+            } else if (resp.status == 204) {
                 console.log('Allowed to use key')
                 IDPromise = Promise.resolve(true)
+            } else {
+                infoBox.textContent = `Got an error response from server: ${resp}`
+                return
             }
 
             // console.log(IDPromise)
@@ -366,11 +386,17 @@
 
             keepAliveInterval =  setInterval( () => {
                 if (spkID && keepAliveTs < Date.now() - keepAliveTimeout ) {
-                    fetch(`${baseUrl}/speakMic`, 
+                    resp = fetch(`${baseUrl}/speakMic`, 
                         {method: 'POST', mode: 'cors', cache: 'no-cache', 
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({'spkID': spkID, 'keep-alive': true})}
-                    )
+                    ).then(resp => {
+                        if (resp.status == 401) {
+                            console.log('Server rejected spkID. Refreshing')
+                            setUpSpeaker() // TODO: Review setup the speaker and file read
+                            readBND4File(actualFile)
+                        }
+                    })
                     keepAliveTs = Date.now()
                     // console.log("Exec keep-alive")
                 }
@@ -395,6 +421,7 @@
     const fileName = document.querySelector('#fileName')
     const fileLastUpdated = document.querySelector('#lastUpdated')
     const infoBox = document.querySelector('#infoBox')
+    const infoState = document.querySelector('#infoState')
     const gridDiv = document.querySelector('.itemGrid')
 
     const randomizerGrid = ["Lordvessel",         "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard",
@@ -726,10 +753,12 @@
 
         //nTrackedPlayer either last changed or last new
         if (trackedPlayer && trackedPlayer.name == nTrackedPlayer.name) { // verify its the same player
-            infoBox.innerHTML += `Tracking ${nTrackedPlayer.name} ...\n`
+            // infoBox.innerHTML += `Tracking ${nTrackedPlayer.name} ...\n`
+            infoState.textContent = `Tracking ${nTrackedPlayer.name}`
         } else {
             trackedPlayer = null // reset tracked player, causes intersect to do a catch-up
-            infoBox.innerHTML += `Watching ${nTrackedPlayer.name}`
+            // infoBox.innerHTML += `Watching ${nTrackedPlayer.name}`
+            infoState.textContent = `Watching ${nTrackedPlayer.name} (waiting for save file update)`
         }
 
         // do set intersect
