@@ -14,15 +14,16 @@
         font-size: 1rem;
         position: absolute;
         color: #141450;
-        top: 1rem;
+        top: 0rem;
         right: 1rem;
         width: 30%;
     }
 
     .dropZone {
         background: lightgray;
-        width: 50rem;
+        /* width: 50rem; */
         /* height: 6rem; */
+        margin-bottom: 2rem;
         font-size: 8rem;
         font-weight: 600;
         text-align: center;
@@ -111,19 +112,47 @@
     }
 
     .browserSourceBtn {
-        padding: 0.2rem 0.6rem;
-        color: white;
-        background: green;
+        /* padding: 0.2rem 0.6rem; */
+        padding: 0;
+        color: black;
+        background: #80808038;
+        border: 2px solid slateblue;
         font-weight: bold;
         text-align: center;
         cursor: pointer;
         /* user-select: none; */
         position: relative;
+        width: 100%;
+        font-size: 0.9rem;
+        height: 2rem;
+        /* border-radius: 0 0 15% 15%; */
+    }
+
+    .hangLeft {
+        background-color: #000C;
+        font-family: monospace;
+        color: snow;
+        text-shadow: 2px 1px black;
+        border-right: 2px solid black;
+        margin: 0;
+        padding: 0.1rem 0.3rem;
+        font-size: 1.2rem;
+        cursor: pointer;
+        /* display: inline-block; */
+        /* left: 0; */
+        /* position: absolute; */
+    }
+
+    .browserSourceBtn:disabled + .hangLeft {
+        cursor: not-allowed;
     }
 
     .browserSourceBtn:disabled {
-        background: gray;
+        --dark-bg: #EEE3;
+        --light-bg: #3033;
+        background: repeating-linear-gradient(135deg, var(--light-bg), var(--light-bg) 10px, var(--dark-bg) 10px, var(--dark-bg) 20px, var(--light-bg) 20px);
         user-select: none;
+        cursor: not-allowed;
     }
 
     .browserSourceBtn::after {
@@ -171,27 +200,41 @@
         position: absolute;
         font-size: 180px;
         writing-mode: vertical-rl;
-        opacity: 40%;
+        opacity: 30%;
         color: red;
     }
 
     .title {
         font-size: 1.7rem;
         font-weight: bold;
-        margin: 0
+        margin: 0;
+        font-family: system-ui;
+        color: #3e4042;
     }
 
     .step {
         /* padding-top: 1rem; */
         font-size: 1.1rem;
         border-top: 1px solid #3336;
-        padding-top: 1rem;
+        padding: 1rem 0;
+        overflow: hidden;
+        max-height: 5rem;
+        margin: 0
     }
 
     .step .step_num {
         font-size: 1.5rem;
-        color: navy;
+        color: black;
         font-weight: bold;
+        
+        border: 3px solid black;
+        padding: 3px;
+        border-radius: 50%;
+        display: inline-block;
+        width: 1.5rem;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        text-align: center;
     }
 
     .save_loc {
@@ -202,17 +245,21 @@
         padding: 0.2rem;
     }
 
+    .bold {
+        font-weight: bold;
+    }
+
+    #steps.min .step:first-child,
+    #steps.min .step:nth-child(2) {
+        max-height: 0px;
+        margin: 0px;
+        padding: 0px;
+        transition: max-height 1s, margin 1s, padding 1s;
+    }
+
 </style>
 
 <body>
-    <div class="dropZone">+
-        <span class="dropBg">Drop save file .sl2 here</span>
-        <span class="dropBBg">Or double click and select a file</span>
-        <div class="fileInfo">
-            <p>File name: <span id="fileName" class="editProp"></span></p> 
-            <p>Updated: <span id="lastUpdated" class="editProp"></span></p>
-        </div>
-    </div>
     
     <div style="display: flex">
         <div class="itemGrid" style="transform:scale(.7)">
@@ -221,27 +268,43 @@
         
         
         <div>
+            <div class="dropZone">+
+                <span class="dropBg">Drop save file .sl2 here</span>
+                <span class="dropBBg">Or double click and select a file</span>
+                <div class="fileInfo">
+                    <p>File name: <span id="fileName" class="editProp"></span></p> 
+                    <p>Updated: <span id="lastUpdated" class="editProp"></span></p>
+                </div>
+            </div>
+
             <p class="title"> DS1:PTE / DS1R Auto-Item Tracker</p>
+            <div id="steps">
             <p class="step">
-                <span class="step_num">1)</span>
-                Find your DS1 save file <span class="save_loc">Documents \ NBGI \ Dark Souls &ltRemastered&gt \ &ltDRAKS0005&gt.sl2</span>
+                <span class="step_num">1</span> Find your DS1 <span class="bold">save file</span> at <br/>
+                <span class="save_loc">Documents \ NBGI \ Dark Souls &ltRemastered&gt \ &ltDRAKS0005&gt.sl2</span><br/>
+
             </p>
             <p class="step">
-                <span class="step_num">2)</span>
-                Drag and Drop the file to the gray zone
+                <span class="step_num">2</span>
+                <span class="bold">Drag & Drop</span> your save file to the gray zone <br/>
+                <span class="bold">OR Double-click</span> the gray zone and select your save file.
+            </p>
+            <p class="step" style="position:relative">
+                <span class="step_num">3</span>
+                <span class="bold">Click</span> and Copy this link to use as a <span class="bold">browser source</span> <br/>
+                <div style="display:flex">
+                    <button class="browserSourceBtn" disabled>Waiting...</button>
+                    <!-- <button class="hangLeft" disabled>Copy</button> -->
+                </div>
             </p>
             <p class="step">
-                <span class="step_num">3)</span>
-                Click to copy this link <button class="browserSourceBtn" disabled>Waiting for File first</button>
-                and use as browser source
+                <span class="step_num">4</span>
+                Keep this page <span class="bold">open</span> and ENJOY!
             </p>
-            <p class="step">
-                Keep this page open and ENJOY!
-            </p>
-            <br/>
             <p>Debug info <span class="infoState"></span></p>
             <p id="infoBox"></p>
-            <p></p>
+            
+            </div>
         </div>
     </div>
 </body>
@@ -251,6 +314,7 @@
     let actualFile;
     let filePollTimeout = null;
     const filePollTime = 2000;
+    let DSPTE_ReadMode = false;
 
     let players = null;
     let oldPlayers = null;
@@ -394,6 +458,7 @@
     async function loadSaveFile (fileHandle) {
         // Load file & fileHandle
         actualFile = await fileHandle.getFile()
+        document.querySelector('#steps').classList.add('min')
 
         if (await actualFile.slice(0, 4).text() == 'BND4') {
             if (!spkID)
@@ -478,6 +543,7 @@
 
         if (version == '00000001') {
             console.info('Appears to be a DS1:PTDE save file')
+            DSPTE_ReadMode = true;
         } else if (version == '\0\0\0\0\0\0\0\0') { //DSR has null data where the version no. is
             console.info('Appears to be a DS1:R save file')
             if (window.crypto && window.crypto.subtle) { // Generating a key via a promise
@@ -487,6 +553,7 @@
                 console.warn('This browser does not support the crypto module; please update!') //It was released in 2014, what you doing
                 return
             }
+            DSPTE_ReadMode = false;
         }
 
         b_idx = 0x50; // container header data starts at 0x40, going straight to the start offset at 0x50
@@ -578,8 +645,8 @@
         console.log(`player ${player.name} computed header in ${performance.now()-p}ms`)
 
         // Read item list
-        const backpackOffset = 0x2E0
-        const backpackEndOffset = 0xE2E0
+        const backpackOffset = DSPTE_ReadMode ? 0x2E0 : 0x2F8   // Note DSR seems to be offset by 24 bytes
+        const backpackEndOffset = DSPTE_ReadMode ? 0xE2E0 : 0xE2F8
         player.items = {}
         player.keyItems = []
         player.itemHash = ''
@@ -592,7 +659,7 @@
             // TODO: After ~100 0xFFFFFFFF item ids I should quit the item check, however item check completes in <10ms on my machine
             // so skipping ~400 items might not save much time
 
-            if (id < 0xFFFFFFFF) { // empty slots have MAX_32_INT value
+            if (true && id < 0xFFFFFFFF) { // empty slots have MAX_32_INT value
                 if (keyItemList[id]) {
                     item.name = keyItemList[id].name // only key item list lookup
                     if (id == 190000 || id == 1396000)

@@ -226,7 +226,7 @@ function getISO_TDS() {
 }
 
 function server_log(text) {
-	console.log(`[${getISO_TS()}]: ${text}`)
+	console.log(`[${getISO_TDS()}]: ${text}`)
 }
 
 function vectorArray(arr) {
@@ -243,6 +243,6 @@ function vectorArray(arr) {
 
 
 server.listen(port, () => {
-	console.log(`[${getISO_TS()}] Server listening at ${port}`)
+	server_log(`Server listening at ${port}`)
 	setInterval(prune, 0.5*min)
 })
