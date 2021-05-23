@@ -27,6 +27,7 @@ A: Dunno how to build for it, and it would take too long. Also it seems Emotrack
 # Changelog
 ### 1.1
 Fixed bug where DS:Remastered items weren't been read correctly. (offset is 0x0EF8 which is different from DS:PTE)
+
 Fixed bug where spkID being null (so for all new clients), the server would not assign a proper spkID meaning both spkID and earID will be null and disconnected
 
 # MVP

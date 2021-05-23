@@ -49,7 +49,7 @@ const registerClient = (req, res) => {
 	let lisID =  parseInt(req.query['ear']) // parse the client id from route
 
 	server_log(`Listen on [${req.ip}] | ${lisID}`)
-	
+
 	if (!Number.isInteger(lisID)) {
 		server_log(`lisID not found ${lisID}`)
 		res.status(400).send('No Listen ID')
@@ -265,3 +265,5 @@ server.listen(port, () => {
 	server_log(`Server listening at ${port}`)
 	setInterval(prune, 0.5*min)
 })
+
+// nohup node DSRandoTracker.js > server.log 2>&1 &
