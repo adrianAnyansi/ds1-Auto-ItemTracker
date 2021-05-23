@@ -47,14 +47,16 @@ const registerClient = (req, res) => {
 	res.set(corsHeaders)
 
 	let lisID =  parseInt(req.query['ear']) // parse the client id from route
+
+	server_log(`Listen on [${req.ip}] | ${lisID}`)
+	
 	if (!Number.isInteger(lisID)) {
 		server_log(`lisID not found ${lisID}`)
-		res.status(500).send('No Listen ID')
+		res.status(400).send('No Listen ID')
 		return
 	}
 	// TODO: if no ID, register to most updated timestamp within 10mins*
 
-	server_log(`Listen on [${req.ip}] | ${lisID}`)
 	res.write('retry: 5000\n\n')
 	if (speakerRegistry[lisID]) {
 		speakerRegistry[lisID].clients.push(res) // add if exists

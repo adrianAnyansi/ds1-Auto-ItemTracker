@@ -200,7 +200,7 @@
 		retryTimeout++ 
 
 		if (!Number.isInteger(earID)) {
-			infoBox.textContent = `ear param is unset. \nIf the link you have does not end with ear=# where # is a number\nor ear=NaN, send me an email!`	
+			infoBox.textContent = `Error: ear param is unset. \n\nIf the link you have does not end with ear=# where # is a number\nor ear=NaN, send me an email!`	
 			saveDataListener.close()
 			return
 		} else if (retryTimeout < 50) {
