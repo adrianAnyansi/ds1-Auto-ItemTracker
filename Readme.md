@@ -24,22 +24,27 @@ A: Either by email tobe.anyansi@gmail.com OR make an issue at the github page. T
 Q: Why didnt you just build this for Emotracker?  
 A: Dunno how to build for it, and it would take too long. Also it seems Emotracker has a convoluted way of displaying a transparent webpage which doesn't work for OBS. If there's a better way, just let me know.
 
+# Changelog
+### 1.1
+Fixed bug where DS:Remastered items weren't been read correctly. (offset is 0x0EF8 which is different from DS:PTE)
+Fixed bug where spkID being null (so for all new clients), the server would not assign a proper spkID meaning both spkID and earID will be null and disconnected
+
 # MVP
     Think I'm done
+
 # If I have time
     Clean up Speaker UI
-        Clean up infoBox
-            better ui for tracking?
+        better ui for tracking?
         Add connection info
     
     More thorough testing 
-        speaker emit/reconnect
-        client connect/reconnect
         garbled data/empty data
 
-    Check transparent on DS background
+    Test with DSR?? (pls help)
 
-    Test with DSR??
+    Add/Remove other items
+    Change layout
+    Add secondary item list (small list at bottom for misc. items)
 
 # Current list
         Lordvessel | Orange Charred Ring | Seath Lord Soul
