@@ -1,6 +1,8 @@
 <html>
     <head>
         <script src="keyItemList.js"></script>
+        <title>DS1-Auto-Item-Tracker-MAIN</title>
+        <meta charset="utf-8"/>
     </head>
 <style>
     .editProp {
@@ -620,12 +622,10 @@
                 let decryptSaveSlotBlob = new Blob([decryptSaveSlotBuffer])
                 console.log(`DSR player decrypt ${performance.now() - p2}ms`)
 
-                savedPlayer = await readPlayerData(decryptSaveSlotBlob.slice(8)) // For some UNGODLY reason, this is offset by 8 bytes.
-                // Maybe I messed something; however I am using the offsets properly and aes-128-cbc uses 16 byte blocks minimum
-                // I don't know if the data / format is different, how much it's different.
+                savedPlayer = await readPlayerData(decryptSaveSlotBlob.slice(8)) // For some reason, this is offset by 8 bytes.
                 console.log(`DSR player took ${performance.now() - p2}ms`)
             }
-            if (!savedPlayer) break
+            // if (!savedPlayer) break //cant early exit if empty slots are first
         }
         console.log(`All players took ${performance.now() - pt}ms`, players)
 
