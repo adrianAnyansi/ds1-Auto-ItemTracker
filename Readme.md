@@ -1,4 +1,4 @@
-# DS1 Item Auto Tracker
+# DS1 Item Auto Tracker FAQ
 
 Q: What is this?  
 A: It's a online DS1 Item tracker, designed primarily for Item randomizers. The website tracks key items to display as a stream overlay. This only works in Chrome due to the FileSystem API.
@@ -12,11 +12,11 @@ A: Souls games auto save like every 2 seconds. So by reading the save file const
 Q: The tracker picked the wrong player.  
 A: By default the tracker picks the last save slot at first. Once one of the characters is updated, then it will pick the character being played. 
 
-Q: Is there a manual mode?  
-A: There isn't at the moment, it will be added on request.
+Q: I bought an item but the tracker didn't update.
+A: Apparently save files aren't updated until you exit a shop? Once you leave the shop the tracker will update.
 
 Q: Can I customize the displayed items?  
-A: Will be added on request. I need to create a system for adding/removing items.
+A: Will be added on request(soon?). I need to create a system for adding/removing items.
 
 Q: So where can I request these things? Or report bugs?  
 A: Either by email tobe.anyansi@gmail.com OR make an issue at the github page. Thanks!
@@ -30,18 +30,14 @@ Fixed bug where DS:Remastered items weren't been read correctly. (offset is 0x0E
 
 Fixed bug where spkID being null (so for all new clients), the server would not assign a proper spkID meaning both spkID and earID will be null and disconnected
 
-# MVP
-    Think I'm done
+## MVP
 
-# If I have time
-    Clean up Speaker UI
-        better ui for tracking?
-        Add connection info
+## TODO
+    Clean up display page
+        Allow name/souls/auto to be disabled?
     
     More thorough testing 
         garbled data/empty data
-
-    Test with DSR?? (pls help)
 
     Add/Remove other items
     Change layout
