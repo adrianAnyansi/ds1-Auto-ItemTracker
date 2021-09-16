@@ -1,3 +1,9 @@
+# Important Note
+
+There's a native C# application that hooks into game memory and can read the item list directly. (It can even change the layout!)
+Would recommend using this instead, unless you have a separate streaming PC for capture or you really need the webpage.
+That project is here: https://github.com/AinTunez/DarkSoulsRandoTracker
+
 # DS1 Item Auto Tracker FAQ
 
 Q: What is this?  
