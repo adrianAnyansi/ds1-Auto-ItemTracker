@@ -84,11 +84,81 @@
         font-weight: bold;
     }
 
+
+    .inlineGroup {
+        display: inline-block;
+        background-color: orange;
+        padding: .2em;
+        font-family: "Candara";
+    }
+
+    #customBar {
+        position: relative;
+        display: flex;
+    }
+
+    #customRemove {
+        display: inline-block;
+        background-color: lightcoral;
+        padding: 0.2em 1em;
+        margin: 0;
+    }
+
+    #customRemove.dragover {
+        background-color: red;
+    }
+
+    #customAdd {
+        background-color: lightblue;
+        color: black;
+        cursor: pointer;
+        border: none;
+        padding: 0.5em 1em;
+        font-weight: bold
+    }
+    #customAdd.open {
+        background-color: blue;
+        color: white;
+    }
+
+    #itemListContainer {
+        background: slategray;
+        padding: 0.4em 0.2em;
+        position: absolute;
+        left: 100%;
+        width: 30em;
+        z-index: 1;
+        display:none
+    }
+    #itemListContainer.open {
+        display: block;
+    }
+    #itemListContainer input {
+        background-color: gray;
+        border-style: dashed;
+        border-color: #575b5e;
+    }
+
+    #itemList {
+        grid: repeat(2, fit-content(55px)) / auto-flow;
+        display: grid;
+        gap: 5px;
+        overflow-x: scroll;
+        background-color: #41464c;
+        padding: 0.5em 0;;
+    }
+
+    #itemList .itemImage {
+        width: 55px;
+        height: 55px;
+
+    }
+
     .itemGrid {
         display: grid;
-        grid-template-columns: repeat(3, 100px);
+        /* grid-template-columns: repeat(3, 100px); */
         gap: 10px;
-        grid-auto-rows: minmax(50px, auto);
+        /* grid-auto-rows: minmax(50px, auto); */
     }
 
     .itemImage {
@@ -97,10 +167,22 @@
         height: 90px;
         position: relative;
         object-fit: contain;
+        margin: 0;
+    }
+
+    .itemImage.blank {
+        filter: none;
+    }
+
+    .itemImage.dragover {
+        background-color: lightblue;
+    }
+
+    .itemImage.dragging {
+        opacity: 0.2;
     }
 
     .itemImage img {
-        
         object-fit: contain;
     }
 
@@ -216,6 +298,7 @@
         writing-mode: vertical-rl;
         opacity: 30%;
         color: red;
+        user-select: none;
     }
 
     .title {
@@ -281,10 +364,34 @@
 <body>
     
     <div style="display: flex">
+        <div class="debugContainer">
+        <div id="customBar">
+            <button id="customLayout">Layout</button>
+            <span class="inlineGroup">
+                <span>Choose Preset:</span>
+                <select id="customPreset">
+                    <option value="basic" selected>Basic Only</option>
+                    <option value="patty">Patty</option>
+                    <option value="allKey">All Key Items</option>
+                    <option value="" disabled>Custom</option>
+                </select>
+            </span>
+            <span id="customRemove">🗑️Drag here to Remove🗑️</span>
+            <span id="customAdd">Add</span>
+            <div id="itemListContainer">
+                <div>
+                    <span>🔍</span>
+                    <input type="search">
+                </div>  
+                <div id="itemList">
+                </div>
+
+            </div>
+        </div>
         <div class="itemGrid">
             <p class="debugDisclaimer">DEBUG</p>
         </div>
-        
+        </div>
         
         <div>
             <div class="dropZone">+
@@ -424,27 +531,259 @@
     const fileLastUpdated = document.querySelector('#lastUpdated')
     const infoBox = document.querySelector('#infoBox')
     const infoState = document.querySelector('#infoState')
-    const gridDiv = document.querySelector('.itemGrid')
+    const itemGridDiv = document.querySelector('.itemGrid')
+    const itemListDiv = document.querySelector('#itemList')
 
-    const randomizerGrid = ["Lordvessel",         "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard",
-                      "Covenant of Artorias", "Key to Depths",       "Four Kings Bequeathed Lord Soul Shard", 
-                      "Peculiar Doll",       "Annex Key",           "Nito Lord Soul",
-                      "Broken Pendant",     "Light Source",         "Bed of Chaos Lord Soul",
-                      "Key to the Seal",  ,  "Basement Key",         
-                      "Blighttown Key",   "Crest of Artorias"]
+    // Item Grid presets
+    const basicsOnlyItemGrid = [["Lordvessel",         "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard"],
+                      ["Covenant of Artorias", "Key to Depths",       "Four Kings Bequeathed Lord Soul Shard"], 
+                      ["Peculiar Doll",       "Annex Key",           "Nito Lord Soul"],
+                      ["Broken Pendant",     "Light Source",         "Bed of Chaos Lord Soul"],
+                      ["Key to the Seal",  ,  "Basement Key"],
+                      ["Blighttown Key",   "Crest of Artorias"]]
 
-    const gridImgLink = {}
-    // generate item grid
-    for (let imgName of randomizerGrid) {
-        if (imgName) {
-            let imgEl = document.createElement('img')
-            imgEl.src = `img/${namedItemList[imgName]}.png`
-            imgEl.classList.add('transparent', 'itemImage')
-            gridDiv.appendChild(imgEl)
-            gridImgLink[imgName] = imgEl
-        } 
-        else gridDiv.appendChild(document.createElement('img'))
+    const pattyItemGrid = [
+        ["Lordvessel", "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard"],
+        ["Covenant of Artorias", "Key to Depths",       "Four Kings Bequeathed Lord Soul Shard"],
+        ["Peculiar Doll",       "Annex Key",           "Nito Lord Soul"],
+        ["Broken Pendant",     "Light Source",         "Bed of Chaos Lord Soul"],
+        ["Key to the Seal",  "Darkmoon Seance Ring",  "Basement Key"],
+    ]
+
+    const AllTheKeyItems = [
+        ["Key to Depths", "Annex Key", "Dungeon Cell Key", "Cage Key", "Key to New Londo Ruins" ],
+        ["Basement Key",  "Big Pilgrim's Key", "Key to the Seal",  "Crest Key", "Mystery Key"],
+        ["Residence Key", "Sewer Chamber Key", "Undead Asylum F2 East Key", "Watchtower Basement Key", "Key to the Seal"],
+        ["Covenant of Artorias", "Crest of Artorias",  "Darkmoon Seance Ring", "Orange Charred Ring", "Peculiar Doll", "Broken Pendant"],
+        ["Lordvessel", "Seath Bequeathed Lord Soul Shard", "Four Kings Bequeathed Lord Soul Shard", "Nito Lord Soul", "Bed of Chaos Lord Soul"],
+    ]
+    // ITEM GRID CONTAINER
+    const itemPresets = [basicsOnlyItemGrid, pattyItemGrid, AllTheKeyItems]
+
+    const gridImgLink = {} // Used to set/unset the items based on save-file
+    let dragTarget = null   // save drag-start target for swaps/spawns
+    const currGridItems = []
+
+    // Remove icon
+    const removeItemDiv = document.getElementById('customRemove')
+    removeItemDiv.addEventListener('dragover', (ev) => {
+        ev.preventDefault()
+        ev.dataTransfer.dropEffect = 'move'
+        removeItemDiv.classList.add('dragover')
+    })
+    removeItemDiv.addEventListener('dragleave', (ev) => {
+        ev.preventDefault()
+        removeItemDiv.classList.remove('dragover')
+    })
+    removeItemDiv.addEventListener('drop', (ev) => {
+        // Remove the target element and delete
+        itemGridDiv.removeChild(dragTarget)
+        removeItemDiv.classList.remove('dragover')
+    })
+
+    // Preset code
+    const presetSelectEl = document.getElementById('customPreset')
+    presetSelectEl.addEventListener('change', (event) => {
+        if (presetSelectEl.value == "basic") {
+            createItemGrid(basicsOnlyItemGrid)
+        } else if (presetSelectEl.value == 'patty') {
+            createItemGrid(pattyItemGrid)
+        } else if (presetSelectEl.value == 'allKey') {
+            createItemGrid(AllTheKeyItems)
+        }
+    })
+
+    // Add Item code
+    const addItemEl = document.getElementById('customAdd')
+    const addItemListCont = document.getElementById('itemListContainer')
+    addItemEl.addEventListener('click', (event) => {
+        addItemEl.classList.toggle('open')
+        addItemListCont.classList.toggle('open', addItemEl.classList.contains('open'))
+    })
+
+
+    // STARTUP HERE
+    // TODO: Load the item format from the Memory/etc
+    createItemGrid(AllTheKeyItems)
+    createItemList()
+    // STARTUP END
+
+    function createItemList() { // Create item list for adding new items
+        for (let item_id in keyItemList) {
+
+            let itemName = keyItemList[item_id]
+            let imgEl = createItemImg(item_id)
+            itemListDiv.appendChild(imgEl)
+            imgEl.addEventListener('dragstart', item_dragstart_handler)
+            imgEl.addEventListener('dragend', item_dragend_handler)
+        }
     }
+
+    function createItemImg (item_id) {
+        let imgEl = document.createElement('img')
+        imgEl.src = `img/${item_id}.png`
+        imgEl.setAttribute('draggable', true)
+        imgEl.setAttribute('item_id', item_id)
+        imgEl.setAttribute('item_name', keyItemList[item_id].name)
+        imgEl.classList.add('itemImage')
+        return imgEl
+    }
+
+    function createItemGrid(itemFormat) {
+        let childrenCopy = Array.from(itemGridDiv.children) // ShallowCopy
+        for (let el of childrenCopy) {
+            if (!el.classList.contains('debugDisclaimer'))
+                itemGridDiv.removeChild(el)
+        } 
+        // Create item grid from an array of arrays
+        // Using a Row -> Col format, null/empty == nothing
+        let maxRowLen = 0
+        for (let itemRow of itemFormat)
+            maxRowLen = Math.max(maxRowLen, itemRow.length)
+
+        let row_idx = 1
+        for (let itemRow of itemFormat) {
+            let col_idx = 1
+            for (let itemName of itemRow) {
+                let item_id = namedItemList[itemName]
+                add_item_to_grid(item_id, col_idx++, row_idx)
+            }
+            row_idx++
+        }
+        calcCurrGridItems()
+    }
+
+    function calcCurrGridItems() { // save the current item grid
+        while (currGridItems.length > 0)
+            currGridItems.pop()
+        
+        let gridLoc = {}
+        // These could be in any order. I need to find min/max then build that
+        let max_row = 0
+        let max_col = 0
+        let item_ref = {}
+        for (let el of itemGridDiv.children) {
+            if (el.getAttribute('item_id') != null) {
+                let el_row = el.style.getPropertyValue('grid-row')
+                el_row = parseInt(el_row.substring(0, el_row.indexOf('/')))-1
+                let el_col = el.style.getPropertyValue('grid-column')
+                el_col = parseInt(el_col.substring(0, el_col.indexOf('/')))-1
+
+                max_row = Math.max(el_row, max_row)
+                max_col = Math.max(el_col, max_col)
+                item_ref[`${el_col},${el_row}`] = el.getAttribute('item_id')
+            }
+        }
+
+        for (let row=0; row <= max_row; row++) {
+            let new_row = [...Array(max_col+1).keys()] // ? way to max Array of length X
+            new_row.fill(null, 0, max_col+1)
+            currGridItems.push(new_row)
+        }
+
+        for (let el_pos in item_ref) {
+            let el_loc = el_pos.split(',')
+            currGridItems[parseInt(el_loc[1])][parseInt(el_loc[0])] = 
+                keyItemList[item_ref[el_pos]].name
+        }
+    }
+
+    function add_item_to_grid(item_id, col=null, row=null) {
+        // Add item to grid
+        let imgEl = document.createElement('img')
+        if (item_id) { // Add img tile to the grid
+            imgEl = createItemImg(item_id)
+            let item_name = keyItemList[item_id]
+            imgEl.classList.add('transparent')
+
+            itemGridDiv.appendChild(imgEl)
+            gridImgLink[item_name] = imgEl
+            imgEl.addEventListener('dragstart', item_dragstart_handler)
+            imgEl.addEventListener('dragend', item_dragend_handler)
+        } else { // Add a blank tile that accepts drop events
+            imgEl = document.createElement('div')
+            imgEl.setAttribute('draggable', false)
+            imgEl.classList.add('itemImage', 'blank')
+            
+            itemGridDiv.appendChild(imgEl)
+        }
+        
+        if (col != null)    imgEl.style.setProperty('grid-column', col)
+        if (row != null)    imgEl.style.setProperty('grid-row', row)
+
+        imgEl.addEventListener('dragleave', item_dragleave_handler)
+        imgEl.addEventListener('dragover', item_dragover_handler)
+        imgEl.addEventListener('drop', item_drop_handler)
+    }
+
+    function item_dragstart_handler(ev) {
+        // Add the target element's id to the data transfer object
+        ev.dataTransfer.setData("text/plain", ev.target.getAttribute('item_id'));
+        ev.dataTransfer.setData("application/el", ev.target);
+        ev.dataTransfer.dropEffect = "move";
+        ev.dataTransfer.setDragImage(ev.target, 10, 10)
+        
+        dragTarget = ev.target
+        dragTarget.classList.add('dragging')
+    }
+
+    function item_dragend_handler(ev) {
+        dragTarget.classList.remove('dragging')
+        dragTarget = null
+    }
+
+    function item_dragover_handler(ev) { // This is necessary
+        ev.preventDefault();
+        // TODO: Anything that isnt an item, ignore
+        ev.dataTransfer.dropEffect = "move";
+        ev.target.classList.add('dragover')
+    }
+
+    function item_dragleave_handler(ev) { // Reset the 
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+        ev.target.classList.remove('dragover')
+    }
+
+    function item_drop_handler(ev) {
+        // Move the new item to this location
+        ev.preventDefault();
+        const item_id = ev.dataTransfer.getData("text/plain");
+
+        const targetEl = ev.target
+        let tarLoc = [targetEl.style.getPropertyValue('grid-column'),
+                        targetEl.style.getPropertyValue('grid-row')]
+        console.log(`Moving ${item_id} to (${tarLoc})`)
+        // Delete old element
+        const currEl = dragTarget
+        let dragLoc = [currEl.style.getPropertyValue('grid-column'),
+                        currEl.style.getPropertyValue('grid-row')]
+
+        if (currEl.parentElement == targetEl.parentElement) {
+            // both in itemGrid, swap locations
+            targetEl.style.setProperty('grid-column', dragLoc[0])
+            targetEl.style.setProperty('grid-row', dragLoc[1])
+
+            // Move currEl over here
+            currEl.style.setProperty('grid-column', tarLoc[0])
+            currEl.style.setProperty('grid-row', tarLoc[1])
+        } else {
+            // If drag element isn't in grid, create new image at target location
+            add_item_to_grid(item_id, tarLoc[0], tarLoc[1])
+            // then delete old item
+            const targetElParent = targetEl.parentElement
+            targetElParent.removeChild(targetEl)
+            delete targetEl
+        }
+
+        ev.target.classList.remove('dragover')
+        
+    }
+
+
+    // ------------------------------------------------------------------------
+    // SAVE-FILE HANDLERS
+    // ------------------------------------------------------------------------
 
     const profileSize = 0x060030;
     const AES_KEY_BYTES = Uint8Array.from([0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10]).buffer;
@@ -774,6 +1113,7 @@
 
         trackedPlayer = nTrackedPlayer
     }
+
 
 
 </script>

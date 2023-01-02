@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# If this is used in the request param, it allows admin access
+secret.txt

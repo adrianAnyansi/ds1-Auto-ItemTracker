@@ -227,7 +227,12 @@ server.get('/dumpinfo', (req, res) => {
 	}
 })
 
-// Utilty funcitons
+// Redirect to webpage
+// server.get('/display', (req, res) => {res.redirect('display.html')})
+// server.get('/main', (req, res) => {res.redirect('main.html')})
+// server.get('/', (req, res) => {res.redirect('main.html')})
+
+// Utilty functions
 function getISO_TS() {
 	return new Date().toLocaleTimeString()
 }

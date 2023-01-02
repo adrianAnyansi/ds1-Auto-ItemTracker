@@ -8,6 +8,26 @@ var keyItemList = {
     "139": {
        "name": "Orange Charred Ring"
     },
+    
+    "149":{
+      "name": "Darkmoon Seance Ring",
+      "desc": "Used to access the Gywndolin fight"
+    },
+   //  "390": {
+   //    "name": "Fire Keeper Soul"
+   //  },
+   //  "391": {
+   //    "name": "Fire Keeper Soul 2"
+   //  },
+   //  "392": {
+   //    "name": "Fire Keeper Soul 3"
+   //  },
+   //  "393": {
+   //    "name": "Fire Keeper Soul (Anastacia)"
+   //  },
+    // Maybe more here
+
+
     "1396000": {
       "name": "Skull Lantern"
     },
@@ -58,12 +78,12 @@ var keyItemList = {
     "2003":{
        "name":"Cage Key"
     },
-    "2004":{
-       "name":"Archive Tower Cell Key"
-    },
-    "2005":{
-       "name":"Archive Tower Giant Door Key"
-    },
+   //  "2004":{
+   //     "name":"Archive Tower Cell Key"
+   //  },
+   //  "2005":{
+   //     "name":"Archive Tower Giant Door Key"
+   //  },
     "2006":{
        "name":"Archive Tower Giant Cell Key"
     },
@@ -103,9 +123,9 @@ var keyItemList = {
     "2019":{
        "name":"Watchtower Basement Key"
     },
-    "2020":{
-       "name":"Archive Tower Extra Key"
-    },
+   //  "2020":{
+   //     "name":"Archive Tower Extra Key"
+   //  },
     "2021":{
        "name":"Residence Key"
     },
@@ -133,21 +153,21 @@ var keyItemList = {
     "2520":{
        "name":"Broken Pendant",
     },
-    "2600":{
-       "name":"Weapon Smithbox"
-    },
-    "2601":{
-       "name":"Armor Smithbox"
-    },
-    "2602":{
-       "name":"Repairbox"
-    },
+   //  "2600":{
+   //     "name":"Weapon Smithbox"
+   //  },
+   //  "2601":{
+   //     "name":"Armor Smithbox"
+   //  },
+   //  "2602":{
+   //     "name":"Repairbox"
+   //  },
     "2607":{
        "name":"Rite of Kindling"
     },
-    "2608":{
-       "name":"Bottomless Box"
-    }
+   //  "2608":{
+   //     "name":"Bottomless Box"
+   //  },
  }
 
 var namedItemList = {}
