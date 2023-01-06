@@ -95,6 +95,7 @@
     #customBar {
         position: relative;
         display: flex;
+        user-select: none;
     }
 
     #customRemove {
@@ -102,6 +103,7 @@
         background-color: lightcoral;
         padding: 0.2em 1em;
         margin: 0;
+        cursor: not-allowed
     }
 
     #customRemove.dragover {
@@ -109,16 +111,55 @@
     }
 
     #customAdd {
-        background-color: lightblue;
+        background-color: #96c2e5;
         color: black;
         cursor: pointer;
         border: none;
         padding: 0.5em 1em;
-        font-weight: bold
+        font-weight: bold;
+        user-select: none;
     }
     #customAdd.open {
         background-color: blue;
         color: white;
+    }
+    #customAdd:hover:not(.open) {
+        background-color: lightblue;
+    }
+
+    #customLayoutLock {
+        background-color: snow;
+        font-size: 1.5em;
+        cursor: pointer;
+        user-select: none;
+        /* box-sizing: content-box; */
+        /* transition: font-size ease-out 0.2s; */
+        padding: 0 0.2em;
+    }
+    #customLayoutLock::after {
+        content: "🔒"
+    }
+    #customLayoutLock.unlocked::after {
+        content: "🔓"
+    }
+    #customLayoutLock:hover {
+        font-size: 1.6em;
+        /* transition: font-size ease-out 0.2s; */
+    }
+
+    #customTooltip {
+        padding: 0.5em 1em;
+        color: black;
+        background-color: #eb9b78;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+    }
+    #customTooltip.open {
+        background-color: coral;
+    }
+    #customTooltip:hover:not(.open) {
+        background-color: #ffc4ae;
     }
 
     #itemListContainer {
@@ -130,7 +171,7 @@
         z-index: 1;
         display:none
     }
-    #itemListContainer.open {
+    #customAdd.open ~ #itemListContainer.open {
         display: block;
     }
     #itemListContainer input {
@@ -145,7 +186,8 @@
         gap: 5px;
         overflow-x: scroll;
         background-color: #41464c;
-        padding: 0.5em 0;;
+        padding: 0.5em 0;
+        justify-content: start;
     }
 
     #itemList .itemImage {
@@ -168,36 +210,62 @@
         position: relative;
         object-fit: contain;
         margin: 0;
+        cursor: grab;
+        user-select: none;
+    }
+
+    .itemImage.transparent {
+        opacity: 0.5;
     }
 
     .itemImage.blank {
         filter: none;
+        cursor: default;
     }
 
     .itemImage.dragover {
         background-color: lightblue;
+        cursor: move;
     }
 
     .itemImage.dragging {
         opacity: 0.2;
+        cursor: grabbing;
     }
 
     .itemImage img {
         object-fit: contain;
     }
 
-    .itemImage[data-tooltip]::after {
+    .itemImage.hideImg {
+        display: none
+    }
+
+    /* .itemImage[data-tooltip]::after {
         content: attr(data-tooltip);
         position: absolute;
         left: 10%;
         top: 20%;
-        z-index: 1;
+        z-index: 100;
         font-size: 14px;
         color: white;
+    } */
+
+    .itemTooltip {
+        position: absolute;
+        z-index: 100;
+        font-size: 14px;
+        color: black;
+        background-color: darkgray;
+        padding: 0.5em 0.2em;
+        user-select: none;
+        white-space: pre;
+        pointer-events: none;
+        display: none;
     }
 
-    .itemImage.transparent {
-        opacity: 0.5;
+    .itemTooltip.show {
+        display: block;
     }
 
     .browserSourceBtn {
@@ -359,25 +427,65 @@
         transition: max-height 1s, margin 1s, padding 1s;
     }
 
+    .msgBox {
+        display: none;
+        background-color: gray;
+        padding: 0.25em;
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        white-space: pre;
+    }
+
+    .msgBox.show {
+        display: flex;
+    }
+
+    .msgBox.error {
+        background-color: #f14d4d;
+    }
+
+    .msgBox.warning {
+        background-color: #f1f150;
+    }
+
+    .msgBox button {
+        justify-self: flex-end;
+    }
+
+    .msgBox p {
+        flex: 1;
+        margin: 0;
+        padding: 0 2em;
+    }
+
 </style>
 
 <body>
-    
+    <div class="itemTooltip">
+        Random test text here
+    </div>
+    <div class="msgBox">
+        <p>Message</p>
+        <button>x</button>
+    </div>
     <div style="display: flex">
         <div class="debugContainer">
         <div id="customBar">
-            <button id="customLayout">Layout</button>
-            <span class="inlineGroup">
+            <span id="customLayoutLock" class="unlocked" data-tooltip="Lock the layout to prevent add/removing.
+Then you can use this as a browser source instead"></span>
+            <button id="customLayout" disabled data-tooltip="(NOT ENABLED) Change layout options">Layout</button>
+            <span class="inlineGroup" data-tooltip="Choose a preset. All changes are auto-saved.">
                 <span>Choose Preset:</span>
                 <select id="customPreset">
-                    <option value="basic" selected>Basic Only</option>
-                    <option value="patty">Patty</option>
+                    <option value="basic">Basic Only</option>
+                    <option value="locksInOrder">Locks In Order*</option>
                     <option value="allKey">All Key Items</option>
-                    <option value="" disabled>Custom</option>
+                    <option value="essential">Essential</option>
+                    <option value="custom" disabled>Custom</option>
                 </select>
             </span>
-            <span id="customRemove">🗑️Drag here to Remove🗑️</span>
-            <span id="customAdd">Add</span>
+            <span id="customRemove" data-tooltip="Items dragged here are deleted">Drag here to Remove🗑️</span>
+            <span id="customAdd" data-tooltip="Click to open a list of items to add">Add</span>
+            <span id="customTooltip" data-tooltip="When pressed, tooltips are shown on the items">?</span>
             <div id="itemListContainer">
                 <div>
                     <span>🔍</span>
@@ -452,8 +560,8 @@
     const displayUrl = '/display.html'
     const keepAliveTimeout = 1000 * 10 * 1; // default to 15s keep alive
     let fetchIDPromise = null
-    let spkID = null
-    let earID = null
+    let spkID = null // id given by server to talk to
+    let earID = null // id given by server to listen on
     let keepAliveTs = Date.now()
     // TODO: Change timing of reserve & keep-alive to after file init 
     let keepAliveInterval = null
@@ -511,14 +619,18 @@
                 }
             }, keepAliveTimeout)
 
+            // send layout on connect
+            sendLayoutChange()
+
         }, err => { // else something went wrong
             infoBox.textContent = "Unable to connect to server."
             console.log(err)
-            throw new Error('This cannot continue (cause server not available)')
+            console.error('This cannot continue (cause server not available)')
+            displayMsgToUser('Server is not available.', 'error')
         })
     }
 
-    let trackedPlayer = {} // this is a diff with player obj
+    let trackedPlayer = null // this is a diff with player obj
 
     // on-screen elements
     const copyDisplayLink = document.querySelector('.browserSourceBtn');
@@ -535,12 +647,37 @@
     const itemListDiv = document.querySelector('#itemList')
 
     // Item Grid presets
-    const basicsOnlyItemGrid = [["Lordvessel",         "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard"],
-                      ["Covenant of Artorias", "Key to Depths",       "Four Kings Bequeathed Lord Soul Shard"], 
-                      ["Peculiar Doll",       "Annex Key",           "Nito Lord Soul"],
-                      ["Broken Pendant",     "Light Source",         "Bed of Chaos Lord Soul"],
-                      ["Key to the Seal",  ,  "Basement Key"],
-                      ["Blighttown Key",   "Crest of Artorias"]]
+    const essentialsGrid = [	[null, "Bed of Chaos Lord Soul", null],
+		                        [null, "Lordvessel", null],
+		                        ["Seath Bequeathed Lord Soul Shard", "Nito Lord Soul", "Four Kings Bequeathed Lord Soul Shard"],
+	]
+
+    const locksInOrderGrid = [
+    [
+        "Undead Asylum F2 West Key",
+        "Key to Depths",
+        "Peculiar Doll",
+        "Annex Key"
+    ],
+    [
+        "Lordvessel",
+        "Key to the Seal",
+        "Broken Pendant",
+        "Crest Key"
+    ],
+    [
+        "Light Source",
+        "Covenant of Artorias",
+        "Archive Tower Giant Cell Key",
+        "Orange Charred Ring"
+    ],
+    [
+        "Nito Lord Soul",
+        "Four Kings Bequeathed Lord Soul Shard",
+        "Seath Bequeathed Lord Soul Shard",
+        "Bed of Chaos Lord Soul"
+    ]
+]
 
     const pattyItemGrid = [
         ["Lordvessel", "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard"],
@@ -551,14 +688,12 @@
     ]
 
     const AllTheKeyItems = [
-        ["Key to Depths", "Annex Key", "Dungeon Cell Key", "Cage Key", "Key to New Londo Ruins" ],
-        ["Basement Key",  "Big Pilgrim's Key", "Key to the Seal",  "Crest Key", "Mystery Key"],
-        ["Residence Key", "Sewer Chamber Key", "Undead Asylum F2 East Key", "Watchtower Basement Key", "Key to the Seal"],
+        ["Key to Depths", "Annex Key", "Dungeon Cell Key", "Cage Key", "Key to New Londo Ruins", null ],
+        ["Basement Key",  "Big Pilgrim's Key", "Key to the Seal",  "Crest Key", "Mystery Key", null],
+        ["Residence Key", "Sewer Chamber Key", "Undead Asylum F2 East Key", "Watchtower Basement Key", "Key to the Seal", null],
         ["Covenant of Artorias", "Crest of Artorias",  "Darkmoon Seance Ring", "Orange Charred Ring", "Peculiar Doll", "Broken Pendant"],
-        ["Lordvessel", "Seath Bequeathed Lord Soul Shard", "Four Kings Bequeathed Lord Soul Shard", "Nito Lord Soul", "Bed of Chaos Lord Soul"],
+        ["Lordvessel", "Seath Bequeathed Lord Soul Shard", "Four Kings Bequeathed Lord Soul Shard", "Nito Lord Soul", "Bed of Chaos Lord Soul", null],
     ]
-    // ITEM GRID CONTAINER
-    const itemPresets = [basicsOnlyItemGrid, pattyItemGrid, AllTheKeyItems]
 
     const gridImgLink = {} // Used to set/unset the items based on save-file
     let dragTarget = null   // save drag-start target for swaps/spawns
@@ -567,6 +702,9 @@
     // Remove icon
     const removeItemDiv = document.getElementById('customRemove')
     removeItemDiv.addEventListener('dragover', (ev) => {
+        if (!dragTarget || dragTarget.parentElement != itemGridDiv) {
+            return
+        }
         ev.preventDefault()
         ev.dataTransfer.dropEffect = 'move'
         removeItemDiv.classList.add('dragover')
@@ -579,19 +717,47 @@
         // Remove the target element and delete
         itemGridDiv.removeChild(dragTarget)
         removeItemDiv.classList.remove('dragover')
+        calcCurrGridItems()
+        createItemGrid(currGridItems)
     })
 
     // Preset code
     const presetSelectEl = document.getElementById('customPreset')
+    const presetLineUp = {
+        'basic': pattyItemGrid,
+        'essential': essentialsGrid,
+        'locksInOrder': locksInOrderGrid,
+        'allKey': AllTheKeyItems
+    }
     presetSelectEl.addEventListener('change', (event) => {
-        if (presetSelectEl.value == "basic") {
-            createItemGrid(basicsOnlyItemGrid)
-        } else if (presetSelectEl.value == 'patty') {
-            createItemGrid(pattyItemGrid)
-        } else if (presetSelectEl.value == 'allKey') {
-            createItemGrid(AllTheKeyItems)
+        if (presetLineUp[presetSelectEl.value]) {
+            createItemGrid(presetLineUp[presetSelectEl.value])
         }
+        calcCurrGridItems()
+        sendLayoutChange()
     })
+
+    
+    const customLockEl = document.getElementById('customLayoutLock')
+    customLockEl.addEventListener('click', event => {
+        customLockEl.classList.toggle('unlocked')
+        disableCustomization(!customLockEl.classList.contains('unlocked'))
+    })
+
+    function disableCustomization(enable=true) {
+        // go through grid and hide all blank tiles
+        for (let el of itemGridDiv.children) {
+            if (el.classList.contains('blank'))
+                el.classList.toggle('hideImg', enable)
+            else
+                el.setAttribute('draggable', !enable)
+        }
+        // // close add toggle and disable
+        // FIXME: Dragging is not locked correctly, dont know what this is caused by
+        // FIXME: Add btn should disable and hide the itemList.
+        // addItemEl.setAttribute('disabled', enable)
+        // addItemEl.classList.toggle('open', !enable)
+    }
 
     // Add Item code
     const addItemEl = document.getElementById('customAdd')
@@ -601,11 +767,90 @@
         addItemListCont.classList.toggle('open', addItemEl.classList.contains('open'))
     })
 
+    const tooltipEl = document.getElementsByClassName('itemTooltip')[0]
+    const tooltipToggleEl = document.getElementById('customTooltip')
+    // const tooltipTriggerTime = 1000*0.4
+    let tooltipBool = false
+
+    tooltipToggleEl.addEventListener('click', (ev) => {
+        tooltipToggleEl.classList.toggle('open')
+        tooltipBool = tooltipToggleEl.classList.contains('open')
+        
+        tooltipEl.classList.toggle('show', tooltipBool)
+    })
+
+    function enableTooltip(el) {
+        el.addEventListener('mouseenter', toolTipMouseEnter)
+        el.addEventListener('mousemove', toolTipMouseMove)
+        el.addEventListener('mouseleave', toolTipMouseLeave)
+    }
+    
+    enableTooltip(tooltipToggleEl)
+    enableTooltip(removeItemDiv)
+    enableTooltip(presetSelectEl.parentElement)
+    enableTooltip(addItemEl)
+    enableTooltip(customLockEl)
+
+    function toolTipMouseEnter (event) {
+        let item_id = event.target.getAttribute('item_id')
+        if (!item_id) {
+            tooltipEl.setHTML(`> ${event.target.getAttribute('data-tooltip')}`)
+        } else {
+            let item_obj = keyItemList[item_id]
+            tooltipEl.setHTML(`> ${item_obj.name} \n${item_obj.desc ? item_obj.desc : ''}`)
+        }
+        
+        tooltipEl.classList.toggle('show', tooltipBool)
+    }
+
+    function toolTipMouseMove (event) {
+        if (!tooltipBool) return
+
+        tooltipEl.style.setProperty('left', event.pageX+'px')
+        tooltipEl.style.setProperty('top', event.pageY+'px')
+    }
+
+    function toolTipMouseLeave (event) {
+        tooltipEl.setHTML(`> Hover over elements for help`)
+        tooltipEl.classList.remove()
+    }
+
+    let msgBox = document.querySelector('.msgBox')
+    document.querySelector('.msgBox button').addEventListener('click', event => {
+        msgBox.classList.remove('show')
+    })
+    function displayMsgToUser(txt, level=null) {
+        msgBox.children[0].textContent = txt
+        msgBox.classList.add('show')
+        msgBox.classList.remove('error', 'warning')
+        if (level == 'error'){
+            msgBox.classList.add('error')
+        } else if (level == 'warning')
+            msgBox.classList.add('warning')
+    }
+
+
+
 
     // STARTUP HERE
-    // TODO: Load the item format from the Memory/etc
-    createItemGrid(AllTheKeyItems)
+    if (window.localStorage.getItem('DS1Rando_1.2patch_notes') == null) {
+        displayMsgToUser('Welcome to DS1-auto-tracker 1.2!!\n You can now change the layout of your items or choose presets!')
+        window.localStorage.setItem('DS1Rando_1.2patch_notes', 'true')
+    }
+    
+    let loadedItemGrid = window.localStorage.getItem('DS1Rando_ItemGrid')
+    if (loadedItemGrid) {
+        createItemGrid(JSON.parse(loadedItemGrid))
+        presetSelectEl.value = "custom"
+    } else {
+        // this is the default
+        createItemGrid(pattyItemGrid)
+        presetSelectEl.value = "basic"
+    }
+    calcCurrGridItems()
     createItemList()
+    document.querySelector('#itemListContainer input').addEventListener('input',
+        searchItemList)
     // STARTUP END
 
     function createItemList() { // Create item list for adding new items
@@ -619,38 +864,72 @@
         }
     }
 
+    function searchItemList(event) { // filter based on change event
+        let filterTxt = event.target.value
+        for (let itemEl of itemListDiv.children) {
+            if (!itemEl.getAttribute('item_name').toLowerCase().includes(filterTxt)) {
+                itemEl.style.display = "none"
+            } else {
+                itemEl.style.display = "inherit"
+            }
+        }
+    }
+
     function createItemImg (item_id) {
         let imgEl = document.createElement('img')
         imgEl.src = `img/${item_id}.png`
         imgEl.setAttribute('draggable', true)
         imgEl.setAttribute('item_id', item_id)
         imgEl.setAttribute('item_name', keyItemList[item_id].name)
+        imgEl.setAttribute('data-tooltip', keyItemList[item_id].name)
+        
+        imgEl.addEventListener('mouseenter', toolTipMouseEnter)
+        imgEl.addEventListener('mousemove', toolTipMouseMove)
+        imgEl.addEventListener('mouseleave', toolTipMouseLeave)
         imgEl.classList.add('itemImage')
         return imgEl
     }
 
     function createItemGrid(itemFormat) {
+
+        customLockEl.classList.add('unlocked')
         let childrenCopy = Array.from(itemGridDiv.children) // ShallowCopy
         for (let el of childrenCopy) {
             if (!el.classList.contains('debugDisclaimer'))
                 itemGridDiv.removeChild(el)
-        } 
+        }
+        for (let id in gridImgLink) {
+            delete gridImgLink[id]
+        }
+
+        if (itemFormat == []) {
+            add_item_to_grid(null, 1,1)
+            return
+        }
         // Create item grid from an array of arrays
         // Using a Row -> Col format, null/empty == nothing
-        let maxRowLen = 0
+        let maxColLen = 0
+        let colLen = 0
         for (let itemRow of itemFormat)
-            maxRowLen = Math.max(maxRowLen, itemRow.length)
+            maxColLen = Math.max(maxColLen, itemRow.length)
 
-        let row_idx = 1
-        for (let itemRow of itemFormat) {
-            let col_idx = 1
-            for (let itemName of itemRow) {
-                let item_id = namedItemList[itemName]
-                add_item_to_grid(item_id, col_idx++, row_idx)
+        
+
+        for (let row_idx=1; row_idx < itemFormat.length+3; row_idx++) {
+            for (let col_idx=1; col_idx < maxColLen+3; col_idx++) {
+                
+                if (row_idx==1 || row_idx==itemFormat.length+2
+                    || col_idx==1 || col_idx == maxColLen+3 ) {
+                    add_item_to_grid(null, col_idx, row_idx)
+                    continue
+                } else {
+                    let itemRow = itemFormat[row_idx-2]
+                    let item_id = namedItemList[itemRow[col_idx-2]]
+                    add_item_to_grid(item_id, col_idx, row_idx)
+                }
             }
-            row_idx++
+
         }
-        calcCurrGridItems()
     }
 
     function calcCurrGridItems() { // save the current item grid
@@ -686,14 +965,58 @@
             currGridItems[parseInt(el_loc[1])][parseInt(el_loc[0])] = 
                 keyItemList[item_ref[el_pos]].name
         }
+
+        trimGrid()
+        window.localStorage.setItem('DS1Rando_ItemGrid', JSON.stringify(currGridItems))
+        sendLayoutChange()
+        createItemGrid(currGridItems)
+    }
+
+    function sendLayoutChange() {
+        if (fetchIDPromise) {
+            fetchIDPromise.then(() => {
+                fetch(`${baseUrl}/speakMic`, 
+                    {method: 'POST', mode: 'cors', cache: 'no-cache', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({'spkID': spkID, 'layout': currGridItems})}
+                )
+                keepAliveTs = Date.now()
+                console.log("Updated Layout")
+            })
+        }
+    }
+
+    function trimGrid() { // ensure grid is not edge padded
+
+        while (currGridItems[0] && currGridItems[0].every( el => el==null )) {
+            currGridItems.shift() // remove top
+        }
+        if (currGridItems[currGridItems.length-1] && 
+                currGridItems[currGridItems.length-1].every(el => el==null )) {
+            currGridItems.pop() // remove bottom
+        }
+        
+
+        while (currGridItems.length != 0 && currGridItems.every(itemRow => itemRow[0] == null, false )) {
+            for (let itemRow of currGridItems) {
+                itemRow.shift()
+            }
+        }
+        while (currGridItems.length != 0 && currGridItems.every(itemRow => (itemRow[itemRow.length-1] != undefined && itemRow[itemRow.length-1] == null) )) {
+            for (let itemRow of currGridItems) {
+                itemRow.pop()
+            }
+        }
+
+
     }
 
     function add_item_to_grid(item_id, col=null, row=null) {
         // Add item to grid
-        let imgEl = document.createElement('img')
+        let imgEl = null
         if (item_id) { // Add img tile to the grid
             imgEl = createItemImg(item_id)
-            let item_name = keyItemList[item_id]
+            let item_name = keyItemList[item_id].name
             imgEl.classList.add('transparent')
 
             itemGridDiv.appendChild(imgEl)
@@ -701,7 +1024,8 @@
             imgEl.addEventListener('dragstart', item_dragstart_handler)
             imgEl.addEventListener('dragend', item_dragend_handler)
         } else { // Add a blank tile that accepts drop events
-            imgEl = document.createElement('div')
+            imgEl = document.createElement('img')
+            imgEl.src = `img/plus_icon.png`
             imgEl.setAttribute('draggable', false)
             imgEl.classList.add('itemImage', 'blank')
             
@@ -718,8 +1042,8 @@
 
     function item_dragstart_handler(ev) {
         // Add the target element's id to the data transfer object
-        ev.dataTransfer.setData("text/plain", ev.target.getAttribute('item_id'));
-        ev.dataTransfer.setData("application/el", ev.target);
+        ev.dataTransfer.setData("item_id", ev.target.getAttribute('item_id'));
+        ev.dataTransfer.setData("item_name", ev.target.getAttribute('item_name'));
         ev.dataTransfer.dropEffect = "move";
         ev.dataTransfer.setDragImage(ev.target, 10, 10)
         
@@ -733,8 +1057,13 @@
     }
 
     function item_dragover_handler(ev) { // This is necessary
+
+        if (!dragTarget ||
+            dragTarget.getAttribute('item_id') == ev.target.getAttribute('item_id')) {
+            ev.dataTransfer.dropEffect = "none";
+            return
+        }
         ev.preventDefault();
-        // TODO: Anything that isnt an item, ignore
         ev.dataTransfer.dropEffect = "move";
         ev.target.classList.add('dragover')
     }
@@ -748,7 +1077,7 @@
     function item_drop_handler(ev) {
         // Move the new item to this location
         ev.preventDefault();
-        const item_id = ev.dataTransfer.getData("text/plain");
+        const item_id = ev.dataTransfer.getData("item_id");
 
         const targetEl = ev.target
         let tarLoc = [targetEl.style.getPropertyValue('grid-column'),
@@ -775,9 +1104,10 @@
             targetElParent.removeChild(targetEl)
             delete targetEl
         }
+        calcCurrGridItems()
 
         ev.target.classList.remove('dragover')
-        
+        presetSelectEl.value = "custom"
     }
 
 
@@ -785,7 +1115,8 @@
     // SAVE-FILE HANDLERS
     // ------------------------------------------------------------------------
 
-    const profileSize = 0x060030;
+    // const profileSize = 0x060030;
+    const profileSize = 0x1f138;
     const AES_KEY_BYTES = Uint8Array.from([0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10]).buffer;
     const AES_IV_BLOCKLEN = 16; // 16 bytes
     let AES_Crypto_Key = null;
@@ -810,13 +1141,20 @@
         }
     })
 
-    // TODO: Do some dragenter/dragdrop/blur styling in the future
 
     //TODO: Too many async / awaits in this chain
     document.querySelector('.dropZone').addEventListener('dblclick', async() => {
+        
+        let pickerOpt = {
+            types: [{description:'Dark Souls Save File',
+                    accept: { 'savefile/sl2': ['.sl2']}
+                }]
+        }
         infoBox.textContent = "Checking";
-        [fileHandle] = await window.showOpenFilePicker() //TODO: add restrictions to file type
-        //TODO: Handle if the file is not valid & request is cancelled
+        // console.log(pickerOpt)
+        // let v = 234
+        [fileHandle] = await window.showOpenFilePicker(pickerOpt)
+        // Cancelled request is obvious to user
         loadSaveFile(fileHandle)
     })
 
@@ -847,6 +1185,7 @@
         } else {
             console.error('This is not a valid BND4 file')
             infoBox.textContent = "This doesn't appear to be a DS1 Save File"
+            displayMsgToUser('This is not a valid BND4 file', 'warning')
         }
     }
 
@@ -890,7 +1229,7 @@
         return timestr
     }
 
-    //TODO: convert to Readable Stream, maybe faster?
+    //NOTE: convert to Readable Stream, maybe faster?
     async function readBND4File (file) {
         // Adapted from gabtoubl's js port
 
@@ -901,8 +1240,8 @@
         let format = await file.slice(0, 4).text() // format at position 0, UTF-8
         if (format != 'BND4') {
             console.warn('Not a valid DS1 save file, missing BND4 tag')
+            displayMsgToUser('This is not a valid BND4 file', 'warning')
             return
-            // TODO: Display warning in GUI
         }
 
         b_idx = 0x18; // version offset
@@ -925,7 +1264,7 @@
         }
 
         b_idx = 0x50; // container header data starts at 0x40, going straight to the start offset at 0x50
-        profileStartOffset = []
+        profileStartOffset = [] // save-file offset is defined at beginning
         // Capture player/profile offsets
         for (let i=0; i<11; i++) {
             profileStartOffset.push( new Uint32Array(await file.slice(b_idx, b_idx+4).arrayBuffer())[0] ); // convert to int (use int8array)
@@ -938,7 +1277,7 @@
         players = []
 
         // Start reading player/profiles
-        // TODO: Change performance data to use measure & etc
+        // NOTE: Change performance data to use measure & etc
         // TODO: Need to rewrite the async logic SO player parse is parallel & has early out
         let pt = performance.now()
         for (let i=0; i<10; i++) {
@@ -946,7 +1285,7 @@
             if (version == '00000001') {
                 let p1 = performance.now()
                 savedPlayer = await readPlayerData(file.slice(profileStartOffset[i], profileStartOffset[i]+profileSize))
-                console.log(`DS1 player took ${performance.now() - p1}`)
+                console.log(`DS1 player took ${performance.now() - p1}ms`)
             } else {
                 let p2 = performance.now()
                 let saveSlotBlob = file.slice(profileStartOffset[i], profileStartOffset[i]+profileSize)
@@ -977,7 +1316,14 @@
             fetch(`${baseUrl}/speakMic`, 
                 {method: 'POST', mode: 'cors', cache: 'no-cache', 
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({'spkID': spkID, 'player': trackedPlayer})}
+                body: JSON.stringify({'spkID': spkID, 'player': trackedPlayer}, 
+                    (key, val) => {
+                        if (val instanceof ArrayBuffer) {
+                            return undefined
+                        }
+                        return val
+                    })
+                }
             )
             keepAliveTs = Date.now()
             console.log("Updated Save-Data")
@@ -990,23 +1336,29 @@
 
         let playerHeaderBuffer = await file.slice(0, 0x170).arrayBuffer() // read player data from the blob
         let player = {}
-        player.headerHash = 0
+
+        // player.buffer = new Uint8Array(await file.arrayBuffer())
+        player.buffer = await file.arrayBuffer()
+        // player.headerBuffer = await file.arrayBuffer(0, (0x100-0x6c))
         player.level = new Uint32Array(playerHeaderBuffer, 0xE8, 1)[0];
         if (player.level == 0) {
             console.warn('Level 0 player detected')
-            return false //TODO: Should skip this unless its a good trigger
+            return false 
         }
         
         player.souls = new Uint32Array(playerHeaderBuffer, 0xec, 1)[0];
-        player.name8 = String.fromCharCode(...new Uint16Array(playerHeaderBuffer, 0x100, 14)) // name via UTF-16
+        player.faith = Number(new BigUint64Array(playerHeaderBuffer, 0xc8, 1)[0]) // max stat is 99
         
         // gotta check for null-chars cause of C-strings
+        // The dataset says 4 byte c_char_p, but it just works better casting from 16-bit chars
+        // player.name8 = new TextDecoder().decode(new Uint8Array(playerHeaderBuffer, 0x100, 28)) // name via UTF-16
+        player.name8 = String.fromCharCode(...new Uint16Array(playerHeaderBuffer, 0x100, 14)) // name via UTF-16
         let nullCharIdx = player.name8.indexOf(String.fromCharCode(0))
         player.name = (nullCharIdx > 0) ? player.name8.substring(0, nullCharIdx) : player.name8 // assuming name is not null here
         players.push(player)
 
         // simple hash for player comparison NOTE: None of this is unique, I don't know what values to use to verify.
-        player.headerHash = player.name + String.fromCharCode(player.souls >> 16, player.souls & 0xFFFF, player.level, )
+        // player.headerHash = player.name + String.fromCharCode(player.souls >> 16, player.souls & 0xFFFF, player.level, )
 
         console.log(`player ${player.name} computed header in ${performance.now()-p}ms`)
 
@@ -1015,14 +1367,14 @@
         const backpackEndOffset = DSPTE_ReadMode ? 0xE2E0 : 0xE2F8
         player.items = {}
         player.keyItems = []
-        player.itemHash = ''
+        // player.itemHash = ''
         p = performance.now()
         let backpackArrayBuffer = (await file.slice(backpackOffset, backpackOffset + backpackEndOffset).arrayBuffer())
 
         for (let item_idx = 0; item_idx + backpackOffset < backpackEndOffset; item_idx += 4*7) {
             let item = {}
             let id = new Uint32Array(backpackArrayBuffer, item_idx+4, 1)[0]
-            // TODO: After ~100 0xFFFFFFFF item ids I should quit the item check, however item check completes in <10ms on my machine
+            // NOTE: After ~100 0xFFFFFFFF item ids I should quit the item check, however item check completes in <10ms on my machine
             // so skipping ~400 items might not save much time
 
             if (true && id < 0xFFFFFFFF) { // empty slots have MAX_32_INT value
@@ -1038,7 +1390,7 @@
                 // NOTE: I don't care about item type but note item ids are not unique 
                 item.have = (0 != new Uint32Array(backpackArrayBuffer, item_idx + 16, 1)[0]) // convert to boolean
                 player.items[id] = item
-                player.itemHash += String.fromCharCode(id, item.amount, item.have)
+                // player.itemHash += String.fromCharCode(id, item.amount, item.have)
             }
         }
 
@@ -1067,45 +1419,83 @@
         */
 
         let nTrackedPlayer = null
+        let nChanged = 0
         if (oldPlayers) {
             for (let i=0; i<players.length; i++) {
+                let changeFound = false
                 if (oldPlayers[i] && oldPlayers[i].name == players[i].name) {
                     playerStats[i] += '<td>F</td>'
                     
-                    if (oldPlayers[i].headerHash != players[i].headerHash) {
-                        playerStats[i] += '<td>H</td>'
-                        nTrackedPlayer = players[i]
+                    if (!bufferComparison(oldPlayers[i].buffer, players[i].buffer)) {
+                        playerStats[i] += '<td>B</td>'
+                        changeFound = true
                     }
-                    if (oldPlayers[i].itemHash != players[i].itemHash) {
-                        playerStats[i] += '<td>I</td>'
-                        nTrackedPlayer = players[i]
-                    }
+                    // if (oldPlayers[i].headerHash != players[i].headerHash) {
+                    //     playerStats[i] += '<td>H</td>'
+                    //     nTrackedPlayer = players[i]
+                    //     changeFound = true
+                    // }
+                    // if (oldPlayers[i].itemHash != players[i].itemHash) {
+                    //     playerStats[i] += '<td>I</td>'
+                    //     nTrackedPlayer = players[i]
+                    //     changeFound = true
+                    // }
                 }
                 playerStats[i] += '</tr>'
+
+                if (changeFound) {
+                    nTrackedPlayer = players[i]
+                    nChanged++
+                }
             }
         }
+
+        if (nChanged > 1) console.warn('More that 1 player updated in one update.')
         
         infoBox.innerHTML = `<table> <thead><th>Name</th> <th>Level</th> <th>Souls</th> <th>Items</th> <th>Track</th></thead>
             ${playerStats.join('\n')} </table><br/>`
 
-        nTrackedPlayer = nTrackedPlayer || players[players.length-1]
+        // nTrackedPlayer = nTrackedPlayer || players[players.length-1] 
 
         //nTrackedPlayer either last changed or last new
-        if (trackedPlayer && trackedPlayer.name == nTrackedPlayer.name) { // verify its the same player
-            // infoBox.innerHTML += `Tracking ${nTrackedPlayer.name} ...\n`
-            infoState.textContent = `Tracking ${nTrackedPlayer.name}`
+        if (trackedPlayer) { // if was tracking
+            if (nTrackedPlayer) {
+                if (trackedPlayer.name == nTrackedPlayer.name) // if same player, allow intersect to update items
+                    infoState.textContent = `Tracking ${nTrackedPlayer.name}`
+                else { // reset tracked player, causes intersect to do a catch-up
+                    trackedPlayer = null 
+                    infoState.textContent = `Swap Track to ${nTrackedPlayer.name}`
+                }
+            } else // if !nTrackedPlayer, no update
+                infoState.textContent = `Tracking ${trackedPlayer.name} [nop]`
         } else {
-            trackedPlayer = null // reset tracked player, causes intersect to do a catch-up
-            // infoBox.innerHTML += `Watching ${nTrackedPlayer.name}`
-            infoState.textContent = `Watching ${nTrackedPlayer.name} (waiting for save file update)`
+            if (nTrackedPlayer) {
+                infoState.textContent = `Tracking ${nTrackedPlayer.name} [new]`
+            } else {
+                infoState.textContent = `Waiting for first update`
+            }
         }
 
-        // do set intersect
+        // if (trackedPlayer && trackedPlayer.name == nTrackedPlayer.name) { // verify its the same player
+        //     // infoBox.innerHTML += `Tracking ${nTrackedPlayer.name} ...\n`
+        //     infoState.textContent = `Tracking ${nTrackedPlayer.name}`
+        // } else if (!trackedPlayer && nTrackedPlayer) { // first read and only 1 change was found
+        //     infoState.textContent = `Now Tracking ${nTrackedPlayer.name} (first update)`
+        // } else if (trackedPlayer && trackedPlayer.name != nTrackedPlayer.name) {
+        //     trackedPlayer = null // reset tracked player, causes intersect to do a catch-up
+        //     infoState.textContent = `Swap track to ${nTrackedPlayer.name}`
+        // } else {
+        //     infoState.textContent = `Waiting for first update`
+        // }
+
+        // do set intersect (requires nTrackedPlayer)
+        if (!nTrackedPlayer) return
+
         let initKeyItems = (trackedPlayer && trackedPlayer.keyItems) || []
         let keyItemIntersect = nTrackedPlayer.keyItems.filter(ki => !initKeyItems.includes(ki))
 
         for (let imgLink in gridImgLink) {
-            if (nTrackedPlayer.keyItems.includes(imgLink))
+            if (nTrackedPlayer.keyItems.includes(imgLink)) // NOTE: ew search over array
                 gridImgLink[imgLink].classList.remove('transparent')
             else
                 gridImgLink[imgLink].classList.add('transparent')
@@ -1114,6 +1504,20 @@
         trackedPlayer = nTrackedPlayer
     }
 
+
+    function bufferComparison(bufferA, bufferB) {
+        if (bufferA.length !== bufferB.length) {
+            return false
+        }
+
+        let dvA = new DataView(bufferA)
+        let dvB = new DataView(bufferB)
+        
+        for (let i = 0; i<dvA.byteLength/4; i++) {
+            if (dvA.getUint32(i) !== dvB.getUint32(i)) return false
+        }
+        return true
+    }
 
 
 </script>

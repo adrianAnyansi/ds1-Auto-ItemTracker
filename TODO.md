@@ -6,20 +6,20 @@ Remove Blighttown Key
 C# has a bug where it spins up CPU cycles if the game isnt launched (3-4 years ago)
 
 ## Important
-- Drag & Drop interface for customizable layouts
-    - Auto expanding grid*
-    - Each column/row should be size scalable
-    - Each vertical/horizontal spacing should be customizable
-- Smaller widget that shows all items temporarily
-    - Modifiable temporary list
 - on MAIN page, server not alive should be more obvious
-- 
+- Make MAIN animatable so you can capture without website
+    - I actually dont want to work on this cause I need to revamp UI for a dark screen
+    - You also cant crop and then interact with the entire webpage. Also the localStorage might not store for that.
+- Make display hide pop-up automatically when connected
 
 ## Optional
 - More thorough testing of garbled data
 - Make it more obvious the tracked player is might switch
-- Wait for 1st update to send information (new flag needed)
+- Maybe set the image for light source based on Skull Lantern, Maggot or Cast Light
+    - Cast Light = item, 14 Faith + useable catalyst
 
+- Smaller widget that shows all items temporarily
+    - Modifiable temporary list
 
 ## NOTES
 

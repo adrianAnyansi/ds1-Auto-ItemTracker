@@ -62,7 +62,12 @@ const registerClient = (req, res) => {
 		speakerRegistry[lisID].clients.push(res) // add if exists
 		// send catch-up information
 		res.write(`event: Save-Data\n`)
-		res.write(`data: ${JSON.stringify(speakerRegistry[lisID].data)}\n\n`)
+		if (speakerRegistry[lisID].data) // TODO: Only send save-data when ready?
+			res.write(`data: ${JSON.stringify(speakerRegistry[lisID].data)}\n\n`)
+
+		res.write(`event: Item-Layout\n`)
+		res.write(`data: ${JSON.stringify(speakerRegistry[lisID].layout)}\n\n`)
+			
 	} else {
 		awaitingSpeaker.add({client: res, ts: Date.now(), lisID: lisID})
 		res.write(`event: No-Speaker\ndata: \n\n`)
@@ -163,7 +168,16 @@ const processSpeakerUpdate = (req, res) => {
 				client.write(`data: ${JSON.stringify(data.player)}\n\n`)
 			}
 			server_log(`Save-data for ${spkID} updated ${speakerIDHash[spkID].clients.length} clients`)
-		} else { // keep-alive msg
+		} else if (data.layout) {
+			speakerIDHash[spkID].layout = data.layout
+
+			for (let client of speakerIDHash[spkID].clients) {
+				client.write(`event: Item-Layout\n`)
+				client.write(`data: ${JSON.stringify(data.layout)}\n\n`)
+			}
+			server_log(`Item-Layout for ${spkID} updated ${speakerIDHash[spkID].clients.length} clients`)
+		} 
+		else { // keep-alive msg
 			for (let client of speakerIDHash[spkID].clients) {
 				client.write(`event: keep-alive\ndata:\n\n`)
 			}
@@ -220,6 +234,8 @@ server.get('/dumpinfo', (req, res) => {
 			info += `\n  ts: ${new Date(speakerIDHash[slot].ts).toUTCString()}\n  lis: ${speakerIDHash[slot].clients.length}\n` 
 			if (speakerIDHash[slot].data)
 				info += `  player: ${speakerIDHash[slot].data.name}\n`
+			if (speakerIDHash[slot].layout)
+				info += `  item layout: ${JSON.stringify(speakerIDHash[slot].layout)}\n`
 		}
 		res.status(200).send(info)
 	} else {

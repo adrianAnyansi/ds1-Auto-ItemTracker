@@ -119,29 +119,28 @@
 	// This is the transparent display portion of the DS1 Tracker
 
 	// Declare and generate the grid for tracking
-	const gridDiv = document.querySelector('.itemGrid')
+	const itemGridDiv = document.querySelector('.itemGrid')
 	const autoCirle = document.querySelector('.autoCircle')
 	const infoBox = document.querySelector('#infoBox')
 
-	const randomizerGrid = ["Lordvessel",         "Orange Charred Ring", "Seath Bequeathed Lord Soul Shard",
-					  "Covenant of Artorias", "Key to Depths",       "Four Kings Bequeathed Lord Soul Shard", 
-					  "Peculiar Doll",       "Annex Key",           "Nito Lord Soul",
-					  "Broken Pendant",     "Light Source",         "Bed of Chaos Lord Soul",
-					  "Key to the Seal",       ,       "Basement Key",         
-					  "Blighttown Key",        ,       "Crest of Artorias"]
+	const randomizerGrid = 
+	[	[null, "Bed of Chaos Lord Soul", null],
+		[null, "Lordvessel", null],
+		["Seath Bequeathed Lord Soul Shard", "Nito Lord Soul", "Four Kings Bequeathed Lord Soul Shard"],
+	]
 
 	const gridImgLink = {}
 
-	for (let imgName of randomizerGrid) {
-		if (imgName) {
-			let imgEl = document.createElement('img')
-			imgEl.src = `img/${namedItemList[imgName]}.png`
-			imgEl.classList.add('transparent', 'itemImage')
-			gridDiv.appendChild(imgEl)
-			gridImgLink[imgName] = imgEl
-		} 
-		else gridDiv.appendChild(document.createElement('img'))
-	}
+	// for (let imgName of randomizerGrid) {
+	// 	if (imgName) {
+	// 		let imgEl = document.createElement('img')
+	// 		imgEl.src = `img/${namedItemList[imgName]}.png`
+	// 		imgEl.classList.add('transparent', 'itemImage')
+	// 		gridDiv.appendChild(imgEl)
+	// 		gridImgLink[imgName] = imgEl
+	// 	} 
+	// 	else gridDiv.appendChild(document.createElement('img'))
+	// }
 
 	let player = null
 	/*
@@ -149,7 +148,55 @@
 		- name      	souls       level       items
 		- keyitems		itemhash    headerhash
 	*/
+	
+	function createItemGrid(itemFormat) {
 
+        let childrenCopy = Array.from(itemGridDiv.children) // ShallowCopy
+        for (let el of childrenCopy) {
+            // if (!el.classList.contains('debugDisclaimer'))
+            itemGridDiv.removeChild(el)
+        }
+        for (let id in gridImgLink) {
+            delete gridImgLink[id]
+        }
+
+        // Create item grid from an array of arrays
+        // Using a Row -> Col format, null/empty == nothing
+        let maxColLen = 0
+        let colLen = 0
+        for (let itemRow of itemFormat)
+            maxColLen = Math.max(maxColLen, itemRow.length)        
+
+        for (let row_idx=1; row_idx <= itemFormat.length; row_idx++) {
+            for (let col_idx=1; col_idx <= maxColLen; col_idx++) {
+                
+				let itemRow = itemFormat[row_idx-1]
+				let item_id = namedItemList[itemRow[col_idx-1]]
+				if (item_id) {
+					let imgEl = createItemImg(item_id, col_idx, row_idx)
+				
+					itemGridDiv.appendChild(imgEl)
+					gridImgLink[keyItemList[item_id].name] = imgEl
+				}
+            }
+        }
+    }
+
+	function createItemImg (item_id, col, row) {
+        let imgEl = document.createElement('img')
+        imgEl.src = `img/${item_id}.png`
+        imgEl.setAttribute('item_id', item_id)
+        imgEl.setAttribute('item_name', keyItemList[item_id].name)
+        imgEl.classList.add('itemImage', 'transparent')
+		
+		
+        if (col != null)    imgEl.style.setProperty('grid-column', col)
+        if (row != null)    imgEl.style.setProperty('grid-row', row)
+
+        return imgEl
+    }
+
+	createItemGrid(randomizerGrid)
 
 	// Set up the Event Source to listen for player events
 	const baseUrl = (window.location.protocol != 'file:') ? 
@@ -196,7 +243,26 @@
 		// infoBox.textContent += `Items: ${Object.keys(player.items).length} \nKey Items: ${player.keyItems.length} \n`
 	})
 
-	let retryTimeout = 0
+	saveDataListener.addEventListener('Item-Layout', event => {
+		retryTimeout = 0
+		autoCirle.classList.remove('disabled', 'waiting')
+		infoBox.textContent = ""
+
+		let parseLayout = JSON.parse(event.data)
+
+		createItemGrid(parseLayout)
+
+		if (player) {
+			for (let imgLink in gridImgLink) {
+				if (player.keyItems.includes(imgLink))
+					gridImgLink[imgLink].classList.remove('transparent')
+				else
+					gridImgLink[imgLink].classList.add('transparent')
+			}
+		}
+	})
+
+	let retryTimeout = 0 // Retry for reconnecting to server
 
 	saveDataListener.addEventListener('error', event => {
 		retryTimeout++ 
