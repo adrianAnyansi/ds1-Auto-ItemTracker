@@ -15,14 +15,20 @@ A: Go to this website https://ds1-auto-tracker.s3.us-east-2.amazonaws.com/main.h
 Q: Ok but how does it work?  
 A: Souls games auto save like every 2 seconds. So by reading the save file constantly, I can tell what items you have and display them.
 
-Q: The tracker picked the wrong player.  
-A: By default the tracker picks the last save slot at first. Once one of the characters is updated, then it will pick the character being played. 
+Q: The tracker picked the wrong player/hasn't picked a player.
+A: The tracker will wait until the savefile is updated to pick a player, which should be the player currently being played. If there are issues with this system, let me know.
 
 Q: I bought an item but the tracker didn't update.
 A: Apparently save files aren't updated until you exit a shop? Once you leave the shop the tracker will update.
 
+Q: I picked up an item and the tracker updated late.
+A: The save file can get saved at abritary times and take up to 7s to update through the tracker. For example it might not save while in combat. You can lock the system layout in MAIN page which should update faster.
+
+Q: Why does the Lordvessel/Souls disappear after being placed at Firelink Altar?
+A: Cause I don't know where it is. More details below.
+
 Q: Can I customize the displayed items?  
-A: Will be added on request(soon?). I need to create a system for adding/removing items.
+A: Simply drag and drop the items from the grid, or press Add and move items from that list to the grid. Or you can choose a preset. The layout is saved to your browser on every change.
 
 Q: So where can I request these things? Or report bugs?  
 A: Either by email tobe.anyansi@gmail.com OR make an issue at the github page. Thanks!
@@ -31,53 +37,33 @@ Q: Why didnt you just build this for Emotracker?
 A: Dunno how to build for it, and it would take too long. Also it seems Emotracker has a convoluted way of displaying a transparent webpage which doesn't work for OBS. If there's a better way, just let me know.
 
 # Changelog
+
+### 1.2
+The item grid has presets and can be drag+dropped
+This reflects on the display page
+More items are available
+
 ### 1.1
 Fixed bug where DS:Remastered items weren't been read correctly. (offset is 0x0EF8 which is different from DS:PTE)
 
 Fixed bug where spkID being null (so for all new clients), the server would not assign a proper spkID meaning both spkID and earID will be null and disconnected
 
-## MVP
+### Explaining the Lordvessel/Soul disappearing act
 
-## TODO
-    Clean up display page
-        Allow name/souls/auto to be disabled?
-    
-    More thorough testing 
-        garbled data/empty data
+So here's the thing. The Lordvessel & Souls are items in your inventory, which I can track easily thanks to the work of the Souls community. However for placing these, I need to track event flags.
 
-    Add/Remove other items
-    Change layout
-    Add secondary item list (small list at bottom for misc. items)
+This is hard. There exists a list of event flags in memory but this doesn't map to the player profile: Not enough bits exist for a flag like 11705397 (Seath, Tail Cut) to fit within the space. I don't know the location that these are stored.
+I programmed a mini-brute force program to best-match and it found nothing.
 
-# Current list
-        Lordvessel | Orange Charred Ring | Seath Lord Soul
-        Convenant of Artioas | Key to Depths | 4 Kings Lord Soul 
-        Painted Doll | Annex Key (A) | Nito Lord Soul
-        Broken Pendant | Light Source | Bed of Chaos Lord Soul
-        Key to the Seal |  | Basement Key
-        Crest of Artioas |  | Blightown Key
+This is assuming that the event flags are even in this format (as bit flags from a set location). They could be saved as strings, saved under a different number, encrypted, shuffled, placed in a key:value format, its very frustating.
 
+DarkSouls seems to write an entire block of memory into the playerProfile regardless, and judging from the memory-viewers there are a lot of event flags being constantly written. 
 
-### Notes
-    So there's likely nothing that changes faster than
-        soul count (killing enemies/buying items)
-        item count / ids
-        changing areas (might be trackable but dunno where)
+Since brute force failed, the next best option is to make multiple Pre-Place Lordvessel save-files and Multiple Post-place Lordvessel files and then continously overlay them and make a best fit diff.
 
+And after ALL that, I have to do the exact same thing for every Lord Soul.
+So I gave up sorry.
 
-361F9 unknown
-
-003C12C0 This seems to be the elapsed time displayed on the save slot  
-I spent 5 hours looking for this  
-However not only is it in a different location from regular player data but it also doesn't update until you quit out (i think?)
-Not going to go into further detail with this as it doesnt update on game start anyway
-
-003C10D4
-
-003C03E4
-
-
-83 D1 E9 D1 5C 23 8E CA 8B 1D 94 B3
 
 ## Links
 DS1 simple item parser
@@ -94,3 +80,6 @@ https://sites.google.com/view/soulsmods/file-formats/sl2-files
 https://github.com/pawREP/Dark-Souls-Remastered-SL2-Unpacker/blob/master/DSR_SL2_Unpacker/DSRSL2Unpacker.cpp
 
 https://github.com/MarkH221/DarkSoulsSaveEditor
+
+### DS-EventHook Event IDs
+https://github.com/Wulf2k/DS-EventHook/blob/master/DS-EventHook/Resources/NamedIDs.txt
