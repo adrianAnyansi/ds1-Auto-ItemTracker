@@ -565,6 +565,7 @@ Then you can use this as a browser source instead"></span>
     let keepAliveTs = Date.now()
     // TODO: Change timing of reserve & keep-alive to after file init 
     let keepAliveInterval = null
+
     
     // Send key
     async function setUpSpeaker () {
@@ -794,10 +795,10 @@ Then you can use this as a browser source instead"></span>
     function toolTipMouseEnter (event) {
         let item_id = event.target.getAttribute('item_id')
         if (!item_id) {
-            tooltipEl.setHTML(`> ${event.target.getAttribute('data-tooltip')}`)
+            tooltipEl.textContent = `> ${event.target.getAttribute('data-tooltip')}`
         } else {
             let item_obj = keyItemList[item_id]
-            tooltipEl.setHTML(`> ${item_obj.name} \n${item_obj.desc ? item_obj.desc : ''}`)
+            tooltipEl.textContent = `> ${item_obj.name} \n${item_obj.desc ? item_obj.desc : ''}`
         }
         
         tooltipEl.classList.toggle('show', tooltipBool)
@@ -811,7 +812,7 @@ Then you can use this as a browser source instead"></span>
     }
 
     function toolTipMouseLeave (event) {
-        tooltipEl.setHTML(`> Hover over elements for help`)
+        tooltipEl.textContent = `> Hover over elements for help`
         tooltipEl.classList.remove()
     }
 
@@ -833,9 +834,15 @@ Then you can use this as a browser source instead"></span>
 
 
     // STARTUP HERE
+
+
     if (window.localStorage.getItem('DS1Rando_1.2patch_notes') == null) {
         displayMsgToUser('Welcome to DS1-auto-tracker 1.2!!\n You can now change the layout of your items or choose presets!')
         window.localStorage.setItem('DS1Rando_1.2patch_notes', 'true')
+    }
+    
+    if (navigator.userAgent.match(/firefox|fxios/i)) {
+        displayMsgToUser("This site only works in Chromium browsers.", "error")
     }
     
     let loadedItemGrid = window.localStorage.getItem('DS1Rando_ItemGrid')

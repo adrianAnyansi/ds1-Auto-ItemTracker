@@ -1,7 +1,7 @@
 # Important Note
 
-There's a native C# application that hooks into game memory and can read the item list directly. (It can even change the layout!)
-Would recommend using this instead, unless you have a separate streaming PC for capture or you really need the webpage.
+There's a native C# application that hooks into game memory and can read the item list directly. 
+Would recommend using this, unless you have a separate streaming PC for capture or you really need the webpage.
 That project is here: https://github.com/AinTunez/DarkSoulsRandoTracker
 
 # DS1 Item Auto Tracker FAQ
@@ -35,6 +35,11 @@ A: Either by email tobe.anyansi@gmail.com OR make an issue at the github page. T
 
 Q: Why didnt you just build this for Emotracker?  
 A: Dunno how to build for it, and it would take too long. Also it seems Emotracker has a convoluted way of displaying a transparent webpage which doesn't work for OBS. If there's a better way, just let me know.
+
+## Startup
+
+Running the server requires this command TO redirect both outputs
+`nohup node DSRandoTracker.js > server.log 2> server_err.log < /dev/null &`
 
 # Changelog
 
