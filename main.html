@@ -511,7 +511,7 @@ Then you can use this as a browser source instead"></span>
                 </div>
             </div>
 
-            <p class="title"> DS1:PTE / DS1R Auto-Tracker<span class="version">1.1</span></p>
+            <p class="title"> DS1:PTE / DS1R Auto-Tracker<span class="version">1.2</span></p>
             <div id="steps">
             <p class="step">
                 <span class="step_num">1</span> Find your DS1 <span class="bold">save file</span> at <br/>
@@ -1122,8 +1122,10 @@ Then you can use this as a browser source instead"></span>
     // SAVE-FILE HANDLERS
     // ------------------------------------------------------------------------
 
-    // const profileSize = 0x060030;
-    const profileSize = 0x1f138;
+    const profileSize = 0x060030;   // This seems to work the most consistently
+    // const profileSize = 0x1f138; // Don't know why this change was made!!! Breaks only DS:R files
+    // const profileSize = 0x60190; // From DS1FP website
+    // document.title = `${profileSize}`
     const AES_KEY_BYTES = Uint8Array.from([0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10]).buffer;
     const AES_IV_BLOCKLEN = 16; // 16 bytes
     let AES_Crypto_Key = null;
@@ -1207,7 +1209,7 @@ Then you can use this as a browser source instead"></span>
 
     function updateFileProperties (file) {
         // takes File NOT FileHandle
-        fileName.textContent = actualFile.name
+        fileName.textContent = actualFile.name + ' '+ (DSPTE_ReadMode ? '[DS1]' : '[DSR]')
         fileLastUpdated.textContent =  `${parseToTimeElapsed(Date.now() - actualFile.lastModified)}ago`
     }
 
@@ -1302,7 +1304,14 @@ Then you can use this as a browser source instead"></span>
                 AES_Crypto_Key = (!AES_Crypto_Key) ? await AES_Crypto_Promise : AES_Crypto_Key
 
                 let saveSlotData = new Uint8Array(await saveSlotPromise)
-                let decryptSaveSlotBuffer = await window.crypto.subtle.decrypt( {name: 'AES-CBC', iv: profile_IV}, AES_Crypto_Key, saveSlotData)
+                let decryptSaveSlotBuffer = null;
+                try {
+                    decryptSaveSlotBuffer = await window.crypto.subtle.decrypt( {name: 'AES-CBC', iv: profile_IV}, AES_Crypto_Key, saveSlotData)
+                } catch {
+                    console.error("Failed to decrypt!!!")
+                    displayMsgToUser('Decrypt had an unknown error! Please send savefile if possible to dev', 'error')
+                    return;
+                }
 
                 let decryptSaveSlotBlob = new Blob([decryptSaveSlotBuffer])
                 console.log(`DSR player decrypt ${performance.now() - p2}ms`)
