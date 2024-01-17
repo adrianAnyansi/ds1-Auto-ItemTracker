@@ -951,9 +951,11 @@ Then you can use this as a browser source instead"></span>
         for (let el of itemGridDiv.children) {
             if (el.getAttribute('item_id') != null) {
                 let el_row = el.style.getPropertyValue('grid-row')
-                el_row = parseInt(el_row.substring(0, el_row.indexOf('/')))-1
+                el_row = parseInt(el_row)
+                // el_row = parseInt(el_row.substring(0, el_row.indexOf('/')))-1
                 let el_col = el.style.getPropertyValue('grid-column')
-                el_col = parseInt(el_col.substring(0, el_col.indexOf('/')))-1
+                el_col = parseInt(el_col)
+                // el_col = parseInt(el_col.substring(0, el_col.indexOf('/')))-1
 
                 max_row = Math.max(el_row, max_row)
                 max_col = Math.max(el_col, max_col)
