@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<script src="keyItemList.js"></script>
@@ -107,7 +108,7 @@
 				<span class="autoCircle disabled ib"></span>
 				<span class="ib autoText">AUTO</span>
 			</div>
-			<span class="autoVersion">ds1-auto-tracker 1.1</span>
+			<span class="autoVersion">ds1-auto-tracker 1.2</span>
 			<p id="infoBox"></p>
 			<p></p>
 		</div>
@@ -200,7 +201,7 @@
 
 	// Set up the Event Source to listen for player events
 	const baseUrl = (window.location.protocol != 'file:') ? 
-        'https://ds1.leagueautotimer.dev' : 'http://localhost:8081'
+        'https://wss.amiinmarbles.com' : 'http://localhost:8081'
 	let earID = parseInt(new URLSearchParams(window.location.search).get('ear'))
 	const saveDataListener = new EventSource(`${baseUrl}/listen?ear=${earID}`)
 

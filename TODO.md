@@ -1,5 +1,17 @@
 # TODO time
 
+# OBS Update:
+Make main/display 1 file. Lock instead removes everything else, and turns into a minified version
+    Need to fix 2 bugs for an OBS version
+        Drop down doesnt work for presets, create my own
+        Drag & Drop breaks
+    Also rewrite the steps by detecting the OBS flag https://github.com/obsproject/obs-browser/blob/master/README.md
+Then collapse everything when lock is pressed (the lock also disappears with time, reshowing on hover)
+
+I wanted to support WebRTC, but it requires a rewrite of server logic & item checks
+    OBS version is simply better in all cases (assuming it works and updates as usual)
+    This is supporting a super rare case of separate streaming computer so I simply will ignore it until someone complains
+
 # Patty notes:
 Remove Crest of Artorias for Darkmoon Seance
 Remove Blighttown Key

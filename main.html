@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <script src="keyItemList.js"></script>
@@ -55,7 +56,9 @@
     }
 
     body {
-        background-color: snow;
+        /* background-color: snow; */
+		background-color: #252525;
+        color: rgb(241, 226, 226);
     }
 
     body div {
@@ -71,7 +74,7 @@
     }
     
     #infoBox table tbody tr:nth-child(odd) {
-        background-color: #e2e2e2;
+        background-color: #0e0a0a;
     }
 
     #infoBox table td {
@@ -128,7 +131,7 @@
     }
 
     #customLayoutLock {
-        background-color: snow;
+        background-color: rgba(255, 250, 250, 0);
         font-size: 1.5em;
         cursor: pointer;
         user-select: none;
@@ -374,7 +377,7 @@
         font-weight: bold;
         margin: 0;
         font-family: system-ui;
-        color: #3e4042;
+        color: #d3d9df;
     }
 
     .title span {
@@ -385,19 +388,20 @@
     .step {
         /* padding-top: 1rem; */
         font-size: 1.1rem;
-        border-top: 1px solid #3336;
+        border-top: 1px solid rgba(255, 244, 244, 0.671);
         padding: 1rem 0;
         overflow: hidden;
         max-height: 5rem;
-        margin: 0
+        margin: 0;
+        color:rgb(241, 226, 226)
     }
 
     .step .step_num {
         font-size: 1.5rem;
-        color: black;
+        color: rgb(241, 226, 226);
         font-weight: bold;
         
-        border: 3px solid black;
+        border: 3px solid rgb(241, 226, 226);
         padding: 3px;
         border-radius: 50%;
         display: inline-block;
@@ -408,7 +412,7 @@
     }
 
     .save_loc {
-        background-color: #eaeaea;
+        background-color: #453d92;
         font-family: system-ui;
         /* color: #25124a; */
         font-weight: 600;
@@ -555,7 +559,7 @@ Then you can use this as a browser source instead"></span>
 
     // Request ID & save in local storage
     const baseUrl = (window.location.protocol != 'file:') ? 
-        'https://ds1.leagueautotimer.dev' : 'http://localhost:8081'
+        'https://wss.amiinmarbles.com' : 'http://localhost:8081'
     const currHostname = window.location.origin
     const displayUrl = '/display.html'
     const keepAliveTimeout = 1000 * 10 * 1; // default to 15s keep alive
